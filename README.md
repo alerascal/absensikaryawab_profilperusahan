@@ -3,8 +3,6 @@
 Proyek ini adalah aplikasi berbasis **Laravel 10** untuk mengelola absensi karyawan sekaligus menampilkan profil perusahaan.  
 Aplikasi ini dirancang untuk memudahkan pencatatan kehadiran dengan **kamera + GPS**, serta memberikan informasi lengkap mengenai profil perusahaan.
 
----
-
 ## ✨ Fitur Utama
 - 📸 **Absensi Kamera** → Ambil foto sebagai bukti kehadiran.
 - 📍 **Validasi GPS** → Absensi hanya bisa dilakukan di lokasi yang ditentukan.
@@ -13,15 +11,11 @@ Aplikasi ini dirancang untuk memudahkan pencatatan kehadiran dengan **kamera + G
 - 📊 **Dashboard Admin** → Monitoring absensi karyawan & ringkasan data.
 - 📂 **Laporan Absensi** → Rekap data absensi harian & bulanan.
 - 🔐 **Autentikasi User** → Login & role management (admin/karyawan).
-
----
-
 ## 🚀 Instalasi
 
 Ikuti langkah berikut untuk menjalankan proyek secara lokal:
 
 ### 1. Clone Repository
-```bash
 git clone https://github.com/alerascal/absensikaryawab_profilperusahan.git
 2. Masuk ke Folder Proyek
 bash
@@ -44,10 +38,7 @@ bash
 Salin kode
 php artisan key:generate
 7. Konfigurasi Database
-Edit file .env dan sesuaikan dengan database lokal kamu:
-
-makefile
-Salin kode
+Edit file .env dan sesuaikan dengan database lokal kamu
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
