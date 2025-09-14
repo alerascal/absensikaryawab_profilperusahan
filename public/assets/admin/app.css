@@ -1,0 +1,36 @@
+.chart-panel {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.chart-panel:hover {
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.06);
+    transform: translateY(-2px);
+}
+
+canvas#monthlyAttendanceChart {
+    max-height: 350px !important;
+    width: 100%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .chart-panel {
+        padding: 1rem;
+    }
+    canvas#monthlyAttendanceChart {
+        max-height: 300px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .chart-panel {
+        padding: 0.75rem;
+    }
+    canvas#monthlyAttendanceChart {
+        max-height: 250px !important;
+    }
+}

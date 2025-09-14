@@ -58,8 +58,13 @@ class Kernel extends HttpKernel
         'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
-
-        // Middleware kustom role
+        'admin' => \App\Http\Middleware\AdminMiddleware::class,
         'role' => \App\Http\Middleware\RoleMiddleware::class,
+        'force.json' => \App\Http\Middleware\ForceJsonResponse::class,
+
     ];
+    protected function schedule(Schedule $schedule)
+    {
+        $schedule->command('chat:archive-weekly')->weekly();
+    }
 }

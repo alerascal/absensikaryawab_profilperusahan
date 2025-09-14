@@ -1,752 +1,182 @@
 @extends('layouts.app')
 
-@section('breadcrumb')
-    Dashboard
-@endsection
+@section('breadcrumb') Dashboard @endsection
 
 @section('content')
-                <!-- Dashboard Section -->
-                <div id="dashboard-section" class="content-section">
-                    <!-- Live Status Card -->
-                    <div class="status-card animate-slide-up">
-                        <div class="live-clock" id="liveClock">14:25:30</div>
-                        <div class="live-date" id="liveDate">
-                            Kamis, 28 Agustus 2025
-                        </div>
+<div id="dashboard-section" class="content-section">
 
-                        <div class="status-info">
-                            <div class="status-item">
-                                <div class="status-value">08:00</div>
-                                <div class="status-label">Jam Masuk</div>
-                            </div>
-                            <div class="status-item">
-                                <div class="status-value">17:00</div>
-                                <div class="status-label">Jam Pulang</div>
-                            </div>
-                            <div class="status-item">
-                                <div class="status-value">Online</div>
-                                <div class="status-label">Status Sistem</div>
-                            </div>
-                            <div class="status-item">
-                                <div class="status-value">145</div>
-                                <div class="status-label">Karyawan Aktif</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Stats Grid -->
-                    <div class="stats-grid animate-fade-in">
-                        <div class="stat-card">
-                            <div class="stat-header">
-                                <div
-                                    class="stat-icon"
-                                    style="background: var(--success-gradient)"
-                                >
-                                    <i class="fas fa-user-check"></i>
-                                </div>
-                            </div>
-                            <div class="stat-number">127</div>
-                            <div class="stat-label">Hadir Hari Ini</div>
-                            <div class="stat-trend trend-up">
-                                <i class="fas fa-arrow-up"></i>
-                                +12% dari kemarin
-                            </div>
-                        </div>
-
-                        <div class="stat-card">
-                            <div class="stat-header">
-                                <div
-                                    class="stat-icon"
-                                    style="background: var(--warning-gradient)"
-                                >
-                                    <i class="fas fa-clock"></i>
-                                </div>
-                            </div>
-                            <div class="stat-number">18</div>
-                            <div class="stat-label">Terlambat</div>
-                            <div class="stat-trend trend-down">
-                                <i class="fas fa-arrow-down"></i>
-                                -5% dari kemarin
-                            </div>
-                        </div>
-
-                        <div class="stat-card">
-                            <div class="stat-header">
-                                <div
-                                    class="stat-icon"
-                                    style="background: var(--danger-gradient)"
-                                >
-                                    <i class="fas fa-user-times"></i>
-                                </div>
-                            </div>
-                            <div class="stat-number">8</div>
-                            <div class="stat-label">Tidak Hadir</div>
-                            <div class="stat-trend trend-up">
-                                <i class="fas fa-arrow-up"></i>
-                                +2% dari kemarin
-                            </div>
-                        </div>
-
-                        <div class="stat-card">
-                            <div class="stat-header">
-                                <div
-                                    class="stat-icon"
-                                    style="
-                                        background: var(--secondary-gradient);
-                                    "
-                                >
-                                    <i class="fas fa-home"></i>
-                                </div>
-                            </div>
-                            <div class="stat-number">12</div>
-                            <div class="stat-label">Work From Home</div>
-                            <div class="stat-trend trend-up">
-                                <i class="fas fa-arrow-up"></i>
-                                +8% dari kemarin
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Quick Actions Panel -->
-                    <div class="quick-panel animate-slide-up">
-                        <div class="panel-header">
-                            <div>
-                                <div class="panel-title">Aksi Cepat</div>
-                                <div class="panel-subtitle">
-                                    Kelola absensi dengan mudah
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="actions-grid">
-                            <button
-                                class="action-btn success"
-                                onclick="markAttendance()"
-                            >
-                                <i class="fas fa-check-circle"></i>
-                                <div class="btn-text">Tandai Hadir</div>
-                                <div class="btn-desc">
-                                    Tandai kehadiran manual
-                                </div>
-                            </button>
-
-                            <button
-                                class="action-btn warning"
-                                onclick="viewReports()"
-                            >
-                                <i class="fas fa-file-alt"></i>
-                                <div class="btn-text">Buat Laporan</div>
-                                <div class="btn-desc">
-                                    Generate laporan absensi
-                                </div>
-                            </button>
-
-                            <button
-                                class="action-btn secondary"
-                                onclick="addEmployee()"
-                            >
-                                <i class="fas fa-user-plus"></i>
-                                <div class="btn-text">Tambah Karyawan</div>
-                                <div class="btn-desc">
-                                    Daftarkan karyawan baru
-                                </div>
-                            </button>
-
-                            <button
-                                class="action-btn danger"
-                                onclick="exportData()"
-                            >
-                                <i class="fas fa-download"></i>
-                                <div class="btn-text">Export Data</div>
-                                <div class="btn-desc">
-                                    Download data Excel/PDF
-                                </div>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Analytics Grid -->
-                    <div class="analytics-grid animate-fade-in">
-                        <div class="chart-panel">
-                            <div class="chart-header">
-                                <div>
-                                    <div class="panel-title">
-                                        Grafik Kehadiran Mingguan
-                                    </div>
-                                    <div class="panel-subtitle">
-                                        Tren kehadiran 7 hari terakhir
-                                    </div>
-                                </div>
-                                <select class="filter-select">
-                                    <option>Minggu Ini</option>
-                                    <option>Minggu Lalu</option>
-                                    <option>Bulan Ini</option>
-                                </select>
-                            </div>
-                            <div class="chart-container">
-                                <i
-                                    class="fas fa-chart-line"
-                                    style="
-                                        font-size: 3rem;
-                                        opacity: 0.3;
-                                        margin-right: 1rem;
-                                    "
-                                ></i>
-                                Grafik akan ditampilkan di sini
-                            </div>
-                        </div>
-
-                        <div class="chart-panel">
-                            <div class="chart-header">
-                                <div>
-                                    <div class="panel-title">
-                                        Departemen Terbaik
-                                    </div>
-                                    <div class="panel-subtitle">
-                                        Berdasarkan tingkat kehadiran
-                                    </div>
-                                </div>
-                            </div>
-                            <div style="padding: 1rem 0">
-                                <div
-                                    style="
-                                        display: flex;
-                                        justify-content: space-between;
-                                        align-items: center;
-                                        padding: 1rem 0;
-                                        border-bottom: 1px solid
-                                            rgba(0, 0, 0, 0.1);
-                                    "
-                                >
-                                    <div>
-                                        <div
-                                            style="
-                                                font-weight: 600;
-                                                color: var(--text-primary);
-                                            "
-                                        >
-                                            IT Development
-                                        </div>
-                                        <div
-                                            style="
-                                                font-size: 0.8rem;
-                                                color: var(--text-secondary);
-                                            "
-                                        >
-                                            25 karyawan
-                                        </div>
-                                    </div>
-                                    <div
-                                        style="
-                                            font-size: 1.2rem;
-                                            font-weight: 700;
-                                            color: #10b981;
-                                        "
-                                    >
-                                        98%
-                                    </div>
-                                </div>
-                                <div
-                                    style="
-                                        display: flex;
-                                        justify-content: space-between;
-                                        align-items: center;
-                                        padding: 1rem 0;
-                                        border-bottom: 1px solid
-                                            rgba(0, 0, 0, 0.1);
-                                    "
-                                >
-                                    <div>
-                                        <div
-                                            style="
-                                                font-weight: 600;
-                                                color: var(--text-primary);
-                                            "
-                                        >
-                                            Marketing
-                                        </div>
-                                        <div
-                                            style="
-                                                font-size: 0.8rem;
-                                                color: var(--text-secondary);
-                                            "
-                                        >
-                                            18 karyawan
-                                        </div>
-                                    </div>
-                                    <div
-                                        style="
-                                            font-size: 1.2rem;
-                                            font-weight: 700;
-                                            color: #10b981;
-                                        "
-                                    >
-                                        95%
-                                    </div>
-                                </div>
-                                <div
-                                    style="
-                                        display: flex;
-                                        justify-content: space-between;
-                                        align-items: center;
-                                        padding: 1rem 0;
-                                        border-bottom: 1px solid
-                                            rgba(0, 0, 0, 0.1);
-                                    "
-                                >
-                                    <div>
-                                        <div
-                                            style="
-                                                font-weight: 600;
-                                                color: var(--text-primary);
-                                            "
-                                        >
-                                            Finance
-                                        </div>
-                                        <div
-                                            style="
-                                                font-size: 0.8rem;
-                                                color: var(--text-secondary);
-                                            "
-                                        >
-                                            12 karyawan
-                                        </div>
-                                    </div>
-                                    <div
-                                        style="
-                                            font-size: 1.2rem;
-                                            font-weight: 700;
-                                            color: #f59e0b;
-                                        "
-                                    >
-                                        92%
-                                    </div>
-                                </div>
-                                <div
-                                    style="
-                                        display: flex;
-                                        justify-content: space-between;
-                                        align-items: center;
-                                        padding: 1rem 0;
-                                    "
-                                >
-                                    <div>
-                                        <div
-                                            style="
-                                                font-weight: 600;
-                                                color: var(--text-primary);
-                                            "
-                                        >
-                                            HR
-                                        </div>
-                                        <div
-                                            style="
-                                                font-size: 0.8rem;
-                                                color: var(--text-secondary);
-                                            "
-                                        >
-                                            8 karyawan
-                                        </div>
-                                    </div>
-                                    <div
-                                        style="
-                                            font-size: 1.2rem;
-                                            font-weight: 700;
-                                            color: #ef4444;
-                                        "
-                                    >
-                                        89%
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Attendance Section -->
-                <div
-                    id="attendance-section"
-                    class="content-section"
-                    style="display: none"
-                >
-                    <div class="attendance-panel animate-slide-up">
-                        <div class="table-controls">
-                            <div>
-                                <div class="panel-title">Absensi Hari Ini</div>
-                                <div class="panel-subtitle">
-                                    Daftar kehadiran karyawan hari ini
-                                </div>
-                            </div>
-                            <div class="filter-group">
-                                <select class="filter-select">
-                                    <option>Semua Departemen</option>
-                                    <option>IT Development</option>
-                                    <option>Marketing</option>
-                                    <option>Finance</option>
-                                    <option>HR</option>
-                                </select>
-                                <select class="filter-select">
-                                    <option>Semua Status</option>
-                                    <option>Hadir</option>
-                                    <option>Terlambat</option>
-                                    <option>Tidak Hadir</option>
-                                    <option>WFH</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="table-container">
-                            <table class="attendance-table">
-                                <thead>
-                                    <tr>
-                                        <th>Karyawan</th>
-                                        <th>Departemen</th>
-                                        <th>Jam Masuk</th>
-                                        <th>Jam Keluar</th>
-                                        <th>Status</th>
-                                        <th>Lokasi</th>
-                                        <th>Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>
-                                            <div class="employee-info">
-                                                <div class="employee-avatar">
-                                                    JD
-                                                </div>
-                                                <div class="employee-details">
-                                                    <h4>John Doe</h4>
-                                                    <span>ID: EMP001</span>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>IT Development</td>
-                                        <td>
-                                            <span class="time-badge"
-                                                >08:00</span
-                                            >
-                                        </td>
-                                        <td>
-                                            <span class="time-badge"
-                                                >17:30</span
-                                            >
-                                        </td>
-                                        <td>
-                                            <span
-                                                class="status-badge status-present"
-                                                ><i class="fas fa-check"></i>
-                                                Hadir</span
-                                            >
-                                        </td>
-                                        <td>
-                                            <span class="location-badge"
-                                                ><i
-                                                    class="fas fa-map-marker-alt"
-                                                ></i>
-                                                Kantor Pusat</span
-                                            >
-                                        </td>
-                                        <td>
-                                            <button
-                                                class="action-btn"
-                                                style="
-                                                    padding: 0.5rem;
-                                                    font-size: 0.8rem;
-                                                    min-height: auto;
-                                                "
-                                                onclick="viewDetails('EMP001')"
-                                            >
-                                                <i class="fas fa-eye"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <div class="employee-info">
-                                                <div class="employee-avatar">
-                                                    JS
-                                                </div>
-                                                <div class="employee-details">
-                                                    <h4>Jane Smith</h4>
-                                                    <span>ID: EMP002</span>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>Marketing</td>
-                                        <td>
-                                            <span class="time-badge"
-                                                >08:15</span
-                                            >
-                                        </td>
-                                        <td>
-                                            <span class="time-badge">-</span>
-                                        </td>
-                                        <td>
-                                            <span
-                                                class="status-badge status-late"
-                                                ><i class="fas fa-clock"></i>
-                                                Terlambat</span
-                                            >
-                                        </td>
-                                        <td>
-                                            <span class="location-badge"
-                                                ><i
-                                                    class="fas fa-map-marker-alt"
-                                                ></i>
-                                                Kantor Pusat</span
-                                            >
-                                        </td>
-                                        <td>
-                                            <button
-                                                class="action-btn"
-                                                style="
-                                                    padding: 0.5rem;
-                                                    font-size: 0.8rem;
-                                                    min-height: auto;
-                                                "
-                                                onclick="viewDetails('EMP002')"
-                                            >
-                                                <i class="fas fa-eye"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <div class="employee-info">
-                                                <div class="employee-avatar">
-                                                    MB
-                                                </div>
-                                                <div class="employee-details">
-                                                    <h4>Mike Brown</h4>
-                                                    <span>ID: EMP003</span>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>Finance</td>
-                                        <td>
-                                            <span class="time-badge"
-                                                >07:45</span
-                                            >
-                                        </td>
-                                        <td>
-                                            <span class="time-badge">-</span>
-                                        </td>
-                                        <td>
-                                            <span
-                                                class="status-badge status-remote"
-                                                ><i class="fas fa-home"></i>
-                                                WFH</span
-                                            >
-                                        </td>
-                                        <td>
-                                            <span class="location-badge"
-                                                ><i class="fas fa-home"></i>
-                                                Remote</span
-                                            >
-                                        </td>
-                                        <td>
-                                            <button
-                                                class="action-btn"
-                                                style="
-                                                    padding: 0.5rem;
-                                                    font-size: 0.8rem;
-                                                    min-height: auto;
-                                                "
-                                                onclick="viewDetails('EMP003')"
-                                            >
-                                                <i class="fas fa-eye"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <div class="employee-info">
-                                                <div class="employee-avatar">
-                                                    SW
-                                                </div>
-                                                <div class="employee-details">
-                                                    <h4>Sarah Wilson</h4>
-                                                    <span>ID: EMP004</span>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>HR</td>
-                                        <td>
-                                            <span class="time-badge">-</span>
-                                        </td>
-                                        <td>
-                                            <span class="time-badge">-</span>
-                                        </td>
-                                        <td>
-                                            <span
-                                                class="status-badge status-absent"
-                                                ><i class="fas fa-times"></i>
-                                                Tidak Hadir</span
-                                            >
-                                        </td>
-                                        <td>
-                                            <span class="location-badge"
-                                                ><i class="fas fa-question"></i>
-                                                -</span
-                                            >
-                                        </td>
-                                        <td>
-                                            <button
-                                                class="action-btn"
-                                                style="
-                                                    padding: 0.5rem;
-                                                    font-size: 0.8rem;
-                                                    min-height: auto;
-                                                "
-                                                onclick="viewDetails('EMP004')"
-                                            >
-                                                <i class="fas fa-eye"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <div class="employee-info">
-                                                <div class="employee-avatar">
-                                                    TJ
-                                                </div>
-                                                <div class="employee-details">
-                                                    <h4>Tom Johnson</h4>
-                                                    <span>ID: EMP005</span>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>IT Development</td>
-                                        <td>
-                                            <span class="time-badge"
-                                                >08:05</span
-                                            >
-                                        </td>
-                                        <td>
-                                            <span class="time-badge">-</span>
-                                        </td>
-                                        <td>
-                                            <span
-                                                class="status-badge status-present"
-                                                ><i class="fas fa-check"></i>
-                                                Hadir</span
-                                            >
-                                        </td>
-                                        <td>
-                                            <span class="location-badge"
-                                                ><i
-                                                    class="fas fa-map-marker-alt"
-                                                ></i>
-                                                Kantor Pusat</span
-                                            >
-                                        </td>
-                                        <td>
-                                            <button
-                                                class="action-btn"
-                                                style="
-                                                    padding: 0.5rem;
-                                                    font-size: 0.8rem;
-                                                    min-height: auto;
-                                                "
-                                                onclick="viewDetails('EMP005')"
-                                            >
-                                                <i class="fas fa-eye"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Other Sections (Hidden by default) -->
-                <div
-                    id="employees-section"
-                    class="content-section"
-                    style="display: none"
-                >
-                    <div class="quick-panel animate-slide-up">
-                        <div class="panel-header">
-                            <div>
-                                <div class="panel-title">
-                                    Manajemen Karyawan
-                                </div>
-                                <div class="panel-subtitle">
-                                    Kelola data karyawan perusahaan
-                                </div>
-                            </div>
-                        </div>
-                        <div class="chart-container">
-                            <i
-                                class="fas fa-users"
-                                style="
-                                    font-size: 3rem;
-                                    opacity: 0.3;
-                                    margin-right: 1rem;
-                                "
-                            ></i>
-                            Fitur manajemen karyawan dalam pengembangan
-                        </div>
-                    </div>
-                </div>
-
-                <div
-                    id="reports-section"
-                    class="content-section"
-                    style="display: none"
-                >
-                    <div class="quick-panel animate-slide-up">
-                        <div class="panel-header">
-                            <div>
-                                <div class="panel-title">Laporan Absensi</div>
-                                <div class="panel-subtitle">
-                                    Generate dan export laporan absensi
-                                </div>
-                            </div>
-                        </div>
-                        <div class="chart-container">
-                            <i
-                                class="fas fa-chart-bar"
-                                style="
-                                    font-size: 3rem;
-                                    opacity: 0.3;
-                                    margin-right: 1rem;
-                                "
-                            ></i>
-                            Fitur laporan dalam pengembangan
-                        </div>
-                    </div>
-                </div>
-
-                <div
-                    id="settings-section"
-                    class="content-section"
-                    style="display: none"
-                >
-                    <div class="quick-panel animate-slide-up">
-                        <div class="panel-header">
-                            <div>
-                                <div class="panel-title">Pengaturan Sistem</div>
-                                <div class="panel-subtitle">
-                                    Konfigurasi sistem absensi
-                                </div>
-                            </div>
-                        </div>
-                        <div class="chart-container">
-                            <i
-                                class="fas fa-cog"
-                                style="
-                                    font-size: 3rem;
-                                    opacity: 0.3;
-                                    margin-right: 1rem;
-                                "
-                            ></i>
-                            Fitur pengaturan dalam pengembangan
-                        </div>
-                    </div>
-                </div>
-            </main>
+    <!-- Live Status Card -->
+    <div class="status-card animate-slide-up bg-white rounded-xl shadow-md p-6">
+        <div class="live-clock text-2xl font-bold text-gray-800" id="liveClock">
+            {{ now()->format('H:i:s') }}
         </div>
-        @endsection
+        <div class="live-date text-sm text-gray-600" id="liveDate">
+            {{ now()->translatedFormat('l, d F Y') }}
+        </div>
+        <div class="status-info grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+            <div class="status-item text-center">
+                <div class="status-value text-lg font-semibold text-gray-900">{{ $jamMasuk }}</div>
+                <div class="status-label text-sm text-gray-600">Jam Masuk</div>
+            </div>
+            <div class="status-item text-center">
+                <div class="status-value text-lg font-semibold text-gray-900">{{ $jamPulang }}</div>
+                <div class="status-label text-sm text-gray-600">Jam Pulang</div>
+            </div>
+            <div class="status-item text-center">
+                <div class="status-value text-lg font-semibold text-gray-900">{{ $statusSistem }}</div>
+                <div class="status-label text-sm text-gray-600">Status Sistem</div>
+            </div>
+            <div class="status-item text-center">
+                <div class="status-value text-lg font-semibold text-gray-900">{{ $karyawanAktif }}/{{ $totalUsers }}</div>
+                <div class="status-label text-sm text-gray-600">Karyawan Aktif / Total</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Grid Modern & Minimalis -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mt-6 animate-fade-in">
+        <div class="stat-card bg-white shadow-md rounded-xl p-5 flex items-center space-x-4 transform transition hover:scale-105 hover:shadow-lg">
+            <div class="stat-icon w-14 h-14 flex items-center justify-center rounded-full bg-green-500 text-white text-2xl">
+                <i class="fas fa-user-check"></i>
+            </div>
+            <div>
+                <div class="stat-number text-3xl font-extrabold text-gray-900">{{ $hadirHariIni }}</div>
+                <div class="stat-label text-sm font-medium text-gray-600">Hadir Hari Ini</div>
+            </div>
+        </div>
+
+        <div class="stat-card bg-white shadow-md rounded-xl p-5 flex items-center space-x-4 transform transition hover:scale-105 hover:shadow-lg">
+            <div class="stat-icon w-14 h-14 flex items-center justify-center rounded-full bg-yellow-500 text-white text-2xl">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div>
+                <div class="stat-number text-3xl font-extrabold text-gray-900">{{ $terlambat }}</div>
+                <div class="stat-label text-sm font-medium text-gray-600">Terlambat</div>
+            </div>
+        </div>
+
+        <div class="stat-card bg-white shadow-md rounded-xl p-5 flex items-center space-x-4 transform transition hover:scale-105 hover:shadow-lg">
+            <div class="stat-icon w-14 h-14 flex items-center justify-center rounded-full bg-red-500 text-white text-2xl">
+                <i class="fas fa-user-times"></i>
+            </div>
+            <div>
+                <div class="stat-number text-3xl font-extrabold text-gray-900">{{ $absenHariIni }}</div>
+                <div class="stat-label text-sm font-medium text-gray-600">Absen</div>
+            </div>
+        </div>
+
+        <div class="stat-card bg-white shadow-md rounded-xl p-5 flex items-center space-x-4 transform transition hover:scale-105 hover:shadow-lg">
+            <div class="stat-icon w-14 h-14 flex items-center justify-center rounded-full bg-blue-500 text-white text-2xl">
+                <i class="fas fa-users"></i>
+            </div>
+            <div>
+                <div class="stat-number text-3xl font-extrabold text-gray-900">{{ $totalUsers }}</div>
+                <div class="stat-label text-sm font-medium text-gray-600">Total Karyawan</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions Panel -->
+    <div class="quick-panel animate-slide-up mt-6 bg-white rounded-xl shadow-md p-6">
+        <div class="panel-header">
+            <div class="panel-title text-lg font-semibold text-gray-800">Aksi Cepat</div>
+            <div class="panel-subtitle text-sm text-gray-600">Kelola absensi dengan mudah</div>
+        </div>
+        <div class="actions-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+            <a href="{{ route('reports.attendance') }}" class="action-btn warning bg-yellow-100 text-yellow-700 rounded-lg p-4 hover:bg-yellow-200 transition">
+                <i class="fas fa-file-alt text-xl"></i>
+                <div class="btn-text font-medium">Buat Laporan</div>
+                <div class="btn-desc text-sm">Generate laporan absensi</div>
+            </a>
+            <a href="{{ route('employees.create') }}" class="action-btn secondary bg-blue-100 text-blue-700 rounded-lg p-4 hover:bg-blue-200 transition">
+                <i class="fas fa-user-plus text-xl"></i>
+                <div class="btn-text font-medium">Tambah Karyawan</div>
+                <div class="btn-desc text-sm">Daftarkan karyawan baru</div>
+            </a>
+            <a href="{{  route('reports.monthly')  }}" class="action-btn danger bg-red-100 text-red-700 rounded-lg p-4 hover:bg-red-200 transition">
+                <i class="fas fa-download text-xl"></i>
+                <div class="btn-text font-medium">Export Data</div>
+                <div class="btn-desc text-sm">Download data Excel/PDF</div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Month Filter -->
+    <div class="flex justify-end mb-4 mt-6">
+        <form action="{{ route('admin.dashboard-admin') }}" method="GET" class="flex items-center space-x-2">
+            <label for="month" class="text-sm font-medium text-gray-700">Pilih Bulan:</label>
+            <select name="month" id="month" class="border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500">
+                @foreach($months as $m)
+                <option value="{{ $m['value'] }}" {{ $month == $m['value'] ? 'selected' : '' }}>{{ $m['name'] }}</option>
+                @endforeach
+            </select>
+            <button type="submit" class="bg-blue-500 text-white rounded-lg px-4 py-2 text-sm hover:bg-blue-600 transition">Tampilkan</button>
+        </form>
+    </div>
+
+    <!-- Chart Section -->
+    <div class="chart-panel mt-6 bg-white rounded-xl shadow-md p-6">
+        <h3 class="text-xl font-bold mb-4 text-gray-800">Grafik Kehadiran Harian ({{ Carbon\Carbon::create(null, $month, 1)->translatedFormat('F Y') }})</h3>
+        <div id="attendanceChartContainer"
+             data-labels="{{ json_encode($monthlyLabels, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) }}"
+             data-hadir="{{ json_encode($monthlyHadir, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) }}"
+             data-terlambat="{{ json_encode($monthlyTerlambat, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) }}"
+             data-absen="{{ json_encode($monthlyAbsen, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) }}">
+            <canvas id="monthlyAttendanceChart" style="max-height: 400px;"></canvas>
+        </div>
+    </div>
+
+    <!-- Departments and Late Table -->
+    <div class="flex flex-col md:flex-row gap-6 mt-6">
+        <div class="flex-1 chart-panel animate-fade-in p-6 bg-white rounded-xl shadow-md">
+            <h3 class="text-lg font-semibold mb-4 text-gray-800">Departemen Terbaik (Persentase Kehadiran)</h3>
+            <ul class="departemen-list space-y-4">
+                @foreach($departments as $dept)
+                <li class="flex items-center justify-between">
+                    <span class="font-medium text-gray-700">{{ $dept->name }}</span>
+                    <span class="font-semibold text-gray-900">{{ $dept->persen }}%</span>
+                </li>
+                <li>
+                    <div class="w-full bg-gray-100 rounded-full h-2.5">
+                        <div class="bg-green-500 h-2.5 rounded-full transition-all duration-300" style="width: {{ $dept->persen }}%"></div>
+                    </div>
+                </li>
+                @endforeach
+            </ul>
+        </div>
+      <div class="overflow-x-auto">
+    <table class="min-w-full text-sm text-left border-collapse">
+        <thead>
+            <tr class="bg-gray-50 text-gray-700">
+                <th class="p-3 border-b font-semibold">No</th>
+                <th class="p-3 border-b font-semibold">Nama Karyawan</th>
+                <th class="p-3 border-b font-semibold">Jam Masuk</th>
+                <th class="p-3 border-b font-semibold">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @php $no=1; @endphp
+            @forelse($terlambatHariIni as $user)
+            <tr class="hover:bg-gray-50 transition">
+                <td class="p-3 border-b">{{ $no++ }}</td>
+                <td class="p-3 border-b">{{ $user->name }}</td>
+                <td class="p-3 border-b">{{ $user->attendance->check_in ?? '-' }}</td>
+                <td class="p-3 border-b text-yellow-600 font-semibold">Terlambat</td>
+            </tr>
+            @empty
+            <tr>
+                <td colspan="4" class="p-3 text-center text-gray-500">Tidak ada yang terlambat hari ini</td>
+            </tr>
+            @endforelse
+        </tbody>
+    </table>
+</div>
+
+    </div>
+</div>
+<!-- Include Chart.js and attendance_chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ asset('assets/admin/attendance_chart.js') }}"></script>
+<link href="{{ asset('assets/admin/attendance_chart.css') }}" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+@endsection

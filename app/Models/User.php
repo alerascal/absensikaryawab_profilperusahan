@@ -2,37 +2,64 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasFactory, SoftDeletes;
 
-    /**
-     * Atribut yang bisa diisi massal
-     */
     protected $fillable = [
         'name',
         'email',
         'password',
-        'role', // 'admin' atau 'pegawai'
+        'role',
+        'department_id',
+        'is_active',
+        'employee_id',
+        'position',
+        'employment_status',
+        'join_date',
     ];
 
-    /**
-     * Atribut yang disembunyikan saat serialisasi
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Cast tipe data
-     */
     protected $casts = [
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed', // otomatis hash password saat create/update
+        'is_active' => 'boolean',
+        'join_date' => 'date',
     ];
+
+    // Relasi ke Department
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
+    }
+
+    // Relasi ke Schedules (pivot table: schedule_user)
+    public function schedules()
+    {
+        return $this->belongsToMany(Schedule::class, 'schedule_user');
+    }
+
+    // Relasi ke Attendances
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class, 'user_id');
+    }
+
+    // Relasi ke Pengajuan (menggantikan atau melengkapi Leave)
+    public function pengajuans()
+    {
+        return $this->hasMany(Pengajuan::class, 'user_id');
+    }
+
+    // Cek apakah user memiliki role tertentu
+    public function hasRole($role)
+    {
+        return $this->role === $role;
+    }
 }

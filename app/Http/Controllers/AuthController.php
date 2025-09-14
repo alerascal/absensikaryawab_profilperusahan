@@ -26,7 +26,7 @@ class AuthController extends Controller
 
             // Redirect berdasarkan role
             if (Auth::user()->role === 'admin') {
-                return redirect()->route('admin.dashboard')->with('success', 'Login berhasil sebagai Admin');
+                return redirect()->route('admin.dashboard-admin')->with('success', 'Login berhasil sebagai Admin');
             } elseif (Auth::user()->role === 'pegawai') {
                 return redirect()->route('pegawai.dashboard')->with('success', 'Login berhasil sebagai Pegawai');
             }
@@ -67,7 +67,7 @@ class AuthController extends Controller
         session()->regenerate();
 
         if ($user->role === 'admin') {
-            return redirect()->route('admin.dashboard')->with('success', 'Login via QR Code berhasil!');
+            return redirect()->route('admin.dashboard-admin')->with('success', 'Login via QR Code berhasil!');
         } else {
             return redirect()->route('pegawai.dashboard')->with('success', 'Login via Biometric berhasil!');
         }

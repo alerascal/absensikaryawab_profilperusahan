@@ -1,619 +1,127 @@
-@extends('layouts.backend')
- @section('content')
-                <!-- Dashboard Section -->
-                <div id="dashboard-section" class="content-section">
-                    <!-- Check-in/Check-out Card -->
-                    <div class="checkin-card animate-slide-up">
-                        <div class="current-time" id="currentTime">
-                            14:25:30
-                        </div>
-                        <div class="current-date" id="currentDate">
-                            Kamis, 28 Agustus 2025
-                        </div>
+@extends('layouts.app')
 
-                        <div class="checkin-actions">
-                            <button
-                                class="checkin-btn"
-                                id="checkinBtn"
-                                onclick="checkIn()"
-                            >
-                                <i class="fas fa-sign-in-alt"></i>
-                                Check In
-                            </button>
-                            <button
-                                class="checkin-btn"
-                                id="checkoutBtn"
-                                onclick="checkOut()"
-                                style="display: none"
-                            >
-                                <i class="fas fa-sign-out-alt"></i>
-                                Check Out
-                            </button>
-                        </div>
+@section('breadcrumb') Dashboard @endsection
 
-                        <div class="status-info">
-                            <div class="status-item">
-                                <div class="status-value" id="checkInTime">
-                                    --:--
-                                </div>
-                                <div class="status-label">Jam Masuk</div>
-                            </div>
-                            <div class="status-item">
-                                <div class="status-value" id="checkOutTime">
-                                    --:--
-                                </div>
-                                <div class="status-label">Jam Keluar</div>
-                            </div>
-                            <div class="status-item">
-                                <div class="status-value" id="workDuration">
-                                    0:00
-                                </div>
-                                <div class="status-label">Total Kerja</div>
-                            </div>
-                            <div class="status-item">
-                                <div class="status-value" id="currentStatus">
-                                    Belum Absen
-                                </div>
-                                <div class="status-label">Status</div>
-                            </div>
-                        </div>
-                    </div>
+@section('content')
+<div id="dashboard-section" class="content-section">
 
-                    <!-- Today Stats -->
-                    <div class="today-stats animate-fade-in">
-                        <div class="stat-card work-hours">
-                            <div class="stat-header">
-                                <div
-                                    class="stat-icon"
-                                    style="background: var(--success-gradient)"
-                                >
-                                    <i class="fas fa-clock"></i>
-                                </div>
-                            </div>
-                            <div class="stat-number">8.5</div>
-                            <div class="stat-label">Jam Kerja Hari Ini</div>
-                        </div>
+    <!-- Live Clock + Info Hari Ini -->
+    <div class="status-card animate-slide-up bg-white rounded-xl shadow-md p-6">
+        <div class="live-clock text-2xl font-bold text-gray-800" id="liveClock">
+            {{ now()->format('H:i:s') }}
+        </div>
+        <div class="live-date text-sm text-gray-600" id="liveDate">
+            {{ now()->translatedFormat('l, d F Y') }}
+        </div>
 
-                        <div class="stat-card overtime">
-                            <div class="stat-header">
-                                <div
-                                    class="stat-icon"
-                                    style="background: var(--warning-gradient)"
-                                >
-                                    <i class="fas fa-plus-circle"></i>
-                                </div>
-                            </div>
-                            <div class="stat-number">1.5</div>
-                            <div class="stat-label">Jam Lembur</div>
-                        </div>
-
-                        <div class="stat-card break-time">
-                            <div class="stat-header">
-                                <div
-                                    class="stat-icon"
-                                    style="background: var(--info-gradient)"
-                                >
-                                    <i class="fas fa-coffee"></i>
-                                </div>
-                            </div>
-                            <div class="stat-number">1:00</div>
-                            <div class="stat-label">Waktu Istirahat</div>
-                        </div>
-
-                        <div class="stat-card location">
-                            <div class="stat-header">
-                                <div
-                                    class="stat-icon"
-                                    style="background: var(--accent-purple)"
-                                >
-                                    <i class="fas fa-map-marker-alt"></i>
-                                </div>
-                            </div>
-                            <div class="stat-number">Kantor</div>
-                            <div class="stat-label">Lokasi Kerja</div>
-                        </div>
-                    </div>
-
-                    <!-- Quick Actions -->
-                    <div class="quick-actions animate-slide-up">
-                        <div class="section-title">Aksi Cepat</div>
-                        <div class="section-subtitle">
-                            Akses fitur yang sering digunakan
-                        </div>
-
-                        <div class="actions-grid">
-                            <a
-                                href="#schedule"
-                                class="action-card schedule"
-                                onclick="showSection('schedule')"
-                            >
-                                <div
-                                    class="action-icon"
-                                    style="background: var(--success-gradient)"
-                                >
-                                    <i class="fas fa-calendar"></i>
-                                </div>
-                                <div class="action-title">Jadwal Kerja</div>
-                                <div class="action-desc">
-                                    Lihat jadwal kerja minggu ini
-                                </div>
-                            </a>
-
-                            <a
-                                href="#history"
-                                class="action-card history"
-                                onclick="showSection('history')"
-                            >
-                                <div
-                                    class="action-icon"
-                                    style="background: var(--info-gradient)"
-                                >
-                                    <i class="fas fa-history"></i>
-                                </div>
-                                <div class="action-title">Riwayat Absensi</div>
-                                <div class="action-desc">
-                                    Cek kehadiran bulan lalu
-                                </div>
-                            </a>
-
-                            <a
-                                href="#leave"
-                                class="action-card leave"
-                                onclick="showSection('leave')"
-                            >
-                                <div
-                                    class="action-icon"
-                                    style="background: var(--warning-gradient)"
-                                >
-                                    <i class="fas fa-calendar-times"></i>
-                                </div>
-                                <div class="action-title">Ajukan Cuti</div>
-                                <div class="action-desc">
-                                    Buat pengajuan cuti baru
-                                </div>
-                            </a>
-
-                            <a
-                                href="#payroll"
-                                class="action-card payroll"
-                                onclick="showSection('payroll')"
-                            >
-                                <div
-                                    class="action-icon"
-                                    style="background: var(--accent-orange)"
-                                >
-                                    <i class="fas fa-file-invoice-dollar"></i>
-                                </div>
-                                <div class="action-title">Slip Gaji</div>
-                                <div class="action-desc">
-                                    Download slip gaji terbaru
-                                </div>
-                            </a>
-                        </div>
-                    </div>
-
-                    <!-- Recent Activity -->
-                    <div class="activity-panel animate-fade-in">
-                        <div class="section-title">Aktivitas Terbaru</div>
-                        <div class="section-subtitle">
-                            Ringkasan aktivitas absensi Anda
-                        </div>
-
-                        <ul class="activity-list">
-                            <li class="activity-item">
-                                <div
-                                    class="activity-icon"
-                                    style="background: var(--success-gradient)"
-                                >
-                                    <i class="fas fa-check"></i>
-                                </div>
-                                <div class="activity-content">
-                                    <div class="activity-title">
-                                        Check-in berhasil
-                                    </div>
-                                    <div class="activity-desc">
-                                        Anda telah check-in pada pukul 08:00 WIB
-                                    </div>
-                                </div>
-                                <div class="activity-time">2 jam lalu</div>
-                            </li>
-
-                            <li class="activity-item">
-                                <div
-                                    class="activity-icon"
-                                    style="background: var(--warning-gradient)"
-                                >
-                                    <i class="fas fa-calendar-check"></i>
-                                </div>
-                                <div class="activity-content">
-                                    <div class="activity-title">
-                                        Pengajuan cuti disetujui
-                                    </div>
-                                    <div class="activity-desc">
-                                        Cuti tanggal 30-31 Agustus telah
-                                        disetujui
-                                    </div>
-                                </div>
-                                <div class="activity-time">1 hari lalu</div>
-                            </li>
-
-                            <li class="activity-item">
-                                <div
-                                    class="activity-icon"
-                                    style="background: var(--info-gradient)"
-                                >
-                                    <i class="fas fa-file-download"></i>
-                                </div>
-                                <div class="activity-content">
-                                    <div class="activity-title">
-                                        Slip gaji tersedia
-                                    </div>
-                                    <div class="activity-desc">
-                                        Slip gaji bulan Juli 2025 telah tersedia
-                                    </div>
-                                </div>
-                                <div class="activity-time">3 hari lalu</div>
-                            </li>
-
-                            <li class="activity-item">
-                                <div
-                                    class="activity-icon"
-                                    style="background: var(--accent-purple)"
-                                >
-                                    <i class="fas fa-clock"></i>
-                                </div>
-                                <div class="activity-content">
-                                    <div class="activity-title">
-                                        Lembur disetujui
-                                    </div>
-                                    <div class="activity-desc">
-                                        Lembur tanggal 25 Agustus (2 jam)
-                                        disetujui
-                                    </div>
-                                </div>
-                                <div class="activity-time">5 hari lalu</div>
-                            </li>
-                        </ul>
-                    </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+            <div class="status-item text-center">
+                <div class="status-value text-lg font-semibold text-gray-900">
+                    {{ $todayCheckIn ?? '-' }}
                 </div>
-
-                <!-- Attendance Section -->
-                <div
-                    id="attendance-section"
-                    class="content-section"
-                    style="display: none"
-                >
-                    <div class="activity-panel animate-slide-up">
-                        <div class="section-title">Absensi Saya</div>
-                        <div class="section-subtitle">
-                            Status kehadiran dan informasi absensi
-                        </div>
-
-                        <div class="today-stats">
-                            <div class="stat-card">
-                                <div class="stat-header">
-                                    <div
-                                        class="stat-icon"
-                                        style="
-                                            background: var(--success-gradient);
-                                        "
-                                    >
-                                        <i class="fas fa-calendar-check"></i>
-                                    </div>
-                                </div>
-                                <div class="stat-number">22</div>
-                                <div class="stat-label">
-                                    Hari Hadir Bulan Ini
-                                </div>
-                            </div>
-
-                            <div class="stat-card">
-                                <div class="stat-header">
-                                    <div
-                                        class="stat-icon"
-                                        style="
-                                            background: var(--warning-gradient);
-                                        "
-                                    >
-                                        <i class="fas fa-clock"></i>
-                                    </div>
-                                </div>
-                                <div class="stat-number">3</div>
-                                <div class="stat-label">Keterlambatan</div>
-                            </div>
-
-                            <div class="stat-card">
-                                <div class="stat-header">
-                                    <div
-                                        class="stat-icon"
-                                        style="
-                                            background: var(--danger-gradient);
-                                        "
-                                    >
-                                        <i class="fas fa-times"></i>
-                                    </div>
-                                </div>
-                                <div class="stat-number">1</div>
-                                <div class="stat-label">Hari Absen</div>
-                            </div>
-
-                            <div class="stat-card">
-                                <div class="stat-header">
-                                    <div
-                                        class="stat-icon"
-                                        style="background: var(--info-gradient)"
-                                    >
-                                        <i class="fas fa-home"></i>
-                                    </div>
-                                </div>
-                                <div class="stat-number">5</div>
-                                <div class="stat-label">Work From Home</div>
-                            </div>
-                        </div>
-
-                        <div
-                            style="
-                                text-align: center;
-                                padding: 2rem;
-                                color: var(--text-secondary);
-                            "
-                        >
-                            <i
-                                class="fas fa-calendar-alt"
-                                style="
-                                    font-size: 3rem;
-                                    opacity: 0.3;
-                                    margin-bottom: 1rem;
-                                "
-                            ></i>
-                            <div>
-                                Kalender absensi detail akan ditampilkan di sini
-                            </div>
-                        </div>
-                    </div>
+                <div class="status-label text-sm text-gray-600">Jam Masuk</div>
+            </div>
+            <div class="status-item text-center">
+                <div class="status-value text-lg font-semibold text-gray-900">
+                    {{ $todayCheckOut ?? '-' }}
                 </div>
-
-                <!-- Other sections with placeholder content -->
-                <div
-                    id="schedule-section"
-                    class="content-section"
-                    style="display: none"
-                >
-                    <div class="activity-panel animate-slide-up">
-                        <div class="section-title">Jadwal Kerja</div>
-                        <div class="section-subtitle">
-                            Jadwal kerja minggu ini dan bulan mendatang
-                        </div>
-                        <div
-                            style="
-                                text-align: center;
-                                padding: 3rem;
-                                color: var(--text-secondary);
-                            "
-                        >
-                            <i
-                                class="fas fa-calendar-week"
-                                style="
-                                    font-size: 3rem;
-                                    opacity: 0.3;
-                                    margin-bottom: 1rem;
-                                "
-                            ></i>
-                            <div>Fitur jadwal kerja akan segera tersedia</div>
-                        </div>
-                    </div>
+                <div class="status-label text-sm text-gray-600">Jam Pulang</div>
+            </div>
+            <div class="status-item text-center">
+                <div class="status-value text-lg font-semibold 
+                    {{ $todayStatus == 'Hadir' ? 'text-green-600' : 'text-red-600' }}">
+                    {{ $todayStatus ?? 'Belum Absen' }}
                 </div>
-
-                <div
-                    id="history-section"
-                    class="content-section"
-                    style="display: none"
-                >
-                    <div class="activity-panel animate-slide-up">
-                        <div class="section-title">Riwayat Absensi</div>
-                        <div class="section-subtitle">
-                            Lihat riwayat kehadiran bulan sebelumnya
-                        </div>
-                        <div
-                            style="
-                                text-align: center;
-                                padding: 3rem;
-                                color: var(--text-secondary);
-                            "
-                        >
-                            <i
-                                class="fas fa-history"
-                                style="
-                                    font-size: 3rem;
-                                    opacity: 0.3;
-                                    margin-bottom: 1rem;
-                                "
-                            ></i>
-                            <div>
-                                Fitur riwayat absensi akan segera tersedia
-                            </div>
-                        </div>
-                    </div>
+                <div class="status-label text-sm text-gray-600">Status</div>
+            </div>
+            <div class="status-item text-center">
+                <div class="status-value text-lg font-semibold text-gray-900">
+                    {{ $totalAbsensi }}
                 </div>
+                <div class="status-label text-sm text-gray-600">Total Kehadiran Bulan Ini</div>
+            </div>
+        </div>
+    </div>
 
-                <div
-                    id="leave-section"
-                    class="content-section"
-                    style="display: none"
-                >
-                    <div class="activity-panel animate-slide-up">
-                        <div class="section-title">Pengajuan Cuti</div>
-                        <div class="section-subtitle">
-                            Ajukan cuti dan lihat status persetujuan
-                        </div>
-                        <div
-                            style="
-                                text-align: center;
-                                padding: 3rem;
-                                color: var(--text-secondary);
-                            "
-                        >
-                            <i
-                                class="fas fa-calendar-times"
-                                style="
-                                    font-size: 3rem;
-                                    opacity: 0.3;
-                                    margin-bottom: 1rem;
-                                "
-                            ></i>
-                            <div>Fitur pengajuan cuti akan segera tersedia</div>
-                        </div>
-                    </div>
-                </div>
+    <!-- Riwayat Absensi -->
+    <div class="mt-6 bg-white rounded-xl shadow-md p-6 animate-fade-in">
+        <h3 class="text-lg font-semibold mb-4 text-gray-800">Riwayat Absensi Minggu Ini</h3>
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-sm text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-50 text-gray-700">
+                        <th class="p-3 border-b font-semibold">Tanggal</th>
+                        <th class="p-3 border-b font-semibold">Jam Masuk</th>
+                        <th class="p-3 border-b font-semibold">Jam Pulang</th>
+                        <th class="p-3 border-b font-semibold">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($weeklyAttendance as $att)
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="p-3 border-b">{{ \Carbon\Carbon::parse($att->date)->translatedFormat('l, d F Y') }}</td>
+                        <td class="p-3 border-b">{{ $att->check_in ?? '-' }}</td>
+                        <td class="p-3 border-b">{{ $att->check_out ?? '-' }}</td>
+                        <td class="p-3 border-b font-semibold 
+                            {{ $att->status == 'Hadir' ? 'text-green-600' : 'text-red-600' }}">
+                            {{ $att->status }}
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="4" class="p-3 text-center text-gray-500">Belum ada data absensi</td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
 
-                <div
-                    id="overtime-section"
-                    class="content-section"
-                    style="display: none"
-                >
-                    <div class="activity-panel animate-slide-up">
-                        <div class="section-title">Lembur</div>
-                        <div class="section-subtitle">
-                            Ajukan lembur dan lihat riwayat
-                        </div>
-                        <div
-                            style="
-                                text-align: center;
-                                padding: 3rem;
-                                color: var(--text-secondary);
-                            "
-                        >
-                            <i
-                                class="fas fa-clock"
-                                style="
-                                    font-size: 3rem;
-                                    opacity: 0.3;
-                                    margin-bottom: 1rem;
-                                "
-                            ></i>
-                            <div>Fitur lembur akan segera tersedia</div>
-                        </div>
-                    </div>
-                </div>
+    <!-- Grafik Kehadiran Bulanan -->
+    <div class="chart-panel mt-6 bg-white rounded-xl shadow-md p-6">
+        <h3 class="text-lg font-bold mb-4 text-gray-800">Grafik Kehadiran Bulan Ini</h3>
+        <div id="attendanceChartContainer"
+             data-labels="{{ json_encode($monthlyLabels) }}"
+             data-hadir="{{ json_encode($monthlyData) }}">
+            <canvas id="pegawaiMonthlyChart" style="max-height: 350px;"></canvas>
+        </div>
+    </div>
+</div>
 
-                <div
-                    id="payroll-section"
-                    class="content-section"
-                    style="display: none"
-                >
-                    <div class="activity-panel animate-slide-up">
-                        <div class="section-title">Slip Gaji</div>
-                        <div class="section-subtitle">
-                            Download dan lihat slip gaji bulanan
-                        </div>
-                        <div
-                            style="
-                                text-align: center;
-                                padding: 3rem;
-                                color: var(--text-secondary);
-                            "
-                        >
-                            <i
-                                class="fas fa-file-invoice-dollar"
-                                style="
-                                    font-size: 3rem;
-                                    opacity: 0.3;
-                                    margin-bottom: 1rem;
-                                "
-                            ></i>
-                            <div>Fitur slip gaji akan segera tersedia</div>
-                        </div>
-                    </div>
-                </div>
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const container = document.getElementById("attendanceChartContainer");
+    if (!container) return;
 
-                <div
-                    id="profile-section"
-                    class="content-section"
-                    style="display: none"
-                >
-                    <div class="activity-panel animate-slide-up">
-                        <div class="section-title">Profil Saya</div>
-                        <div class="section-subtitle">
-                            Kelola informasi profil dan pengaturan akun
-                        </div>
-                        <div
-                            style="
-                                text-align: center;
-                                padding: 3rem;
-                                color: var(--text-secondary);
-                            "
-                        >
-                            <i
-                                class="fas fa-user"
-                                style="
-                                    font-size: 3rem;
-                                    opacity: 0.3;
-                                    margin-bottom: 1rem;
-                                "
-                            ></i>
-                            <div>Fitur profil akan segera tersedia</div>
-                        </div>
-                    </div>
-                </div>
+    const labels = JSON.parse(container.dataset.labels || "[]");
+    const hadir  = JSON.parse(container.dataset.hadir || "[]");
 
-                <div
-                    id="notifications-section"
-                    class="content-section"
-                    style="display: none"
-                >
-                    <div class="activity-panel animate-slide-up">
-                        <div class="section-title">Notifikasi</div>
-                        <div class="section-subtitle">
-                            Kelola notifikasi dan pengingat
-                        </div>
-                        <div
-                            style="
-                                text-align: center;
-                                padding: 3rem;
-                                color: var(--text-secondary);
-                            "
-                        >
-                            <i
-                                class="fas fa-bell"
-                                style="
-                                    font-size: 3rem;
-                                    opacity: 0.3;
-                                    margin-bottom: 1rem;
-                                "
-                            ></i>
-                            <div>Fitur notifikasi akan segera tersedia</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div
-                    id="help-section"
-                    class="content-section"
-                    style="display: none"
-                >
-                    <div class="activity-panel animate-slide-up">
-                        <div class="section-title">Bantuan</div>
-                        <div class="section-subtitle">
-                            Panduan penggunaan dan FAQ
-                        </div>
-                        <div
-                            style="
-                                text-align: center;
-                                padding: 3rem;
-                                color: var(--text-secondary);
-                            "
-                        >
-                            <i
-                                class="fas fa-question-circle"
-                                style="
-                                    font-size: 3rem;
-                                    opacity: 0.3;
-                                    margin-bottom: 1rem;
-                                "
-                            ></i>
-                            <div>Halaman bantuan akan segera tersedia</div>
-                        </div>
-                    </div>
-                </div>
-                @endsection
-     
+    const ctx = document.getElementById("pegawaiMonthlyChart").getContext("2d");
+    new Chart(ctx, {
+        type: "bar",
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: "Jumlah Absensi",
+                    data: hadir,
+                    backgroundColor: "rgba(59, 130, 246, 0.7)",
+                    borderRadius: 6,
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+});
+</script>
+@endsection

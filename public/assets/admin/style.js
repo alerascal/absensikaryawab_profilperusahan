@@ -1,415 +1,374 @@
-document.addEventListener("DOMContentLoaded", function () {
-    console.log("App Initialized");
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("Camera Attendance Module Initialized");
 
-    const loadingOverlay = document.getElementById("loadingOverlay");
-    console.log("Overlay found:", loadingOverlay);
-
-    setTimeout(() => {
-        if (loadingOverlay) {
-            console.log("Hiding overlay...");
-            loadingOverlay.style.opacity = "0";
-            setTimeout(() => {
-                loadingOverlay.style.display = "none";
-            }, 500);
-        }
-    }, 1000);
-
-    // Initialize clock
-    updateClock();
-    setInterval(updateClock, 1000);
-
-    // Initialize search functionality
-    initializeSearch();
-
-    // Show welcome notification
-    showNotification("Selamat datang di AttendPro!", "success");
-});
-
-// Create sidebar overlay for mobile
-function createSidebarOverlay() {
-    const overlay = document.createElement('div');
-    overlay.className = 'sidebar-overlay';
-    overlay.id = 'sidebarOverlay';
-    overlay.addEventListener('click', closeSidebar);
-    document.body.appendChild(overlay);
-}
-
-// Clock functionality
-function updateClock() {
-    const now = new Date();
-    const timeString = now.toLocaleTimeString("id-ID", {
-        hour12: false,
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-    });
-
-    const dateString = now.toLocaleDateString("id-ID", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-    });
-
-    const clockElement = document.getElementById("liveClock");
-    const dateElement = document.getElementById("liveDate");
-    
-    if (clockElement) clockElement.textContent = timeString;
-    if (dateElement) dateElement.textContent = dateString;
-}
-
-// Navigation functionality
-function showSection(sectionName) {
-    // Hide all sections
-    const sections = document.querySelectorAll(".content-section");
-    sections.forEach((section) => {
-        section.style.display = "none";
-    });
-
-    // Show selected section
-    const targetSection = document.getElementById(sectionName + "-section");
-    if (targetSection) {
-        targetSection.style.display = "block";
-    }
-
-    // Update navigation active state
-    const navLinks = document.querySelectorAll(".nav-link");
-    navLinks.forEach((link) => {
-        link.classList.remove("active");
-    });
-
-    // Add active class to clicked link
-    if (event && event.target) {
-        event.target.classList.add("active");
-    }
-
-    // Update page title and breadcrumb
-    const titles = {
-        dashboard: "Dashboard Absensi",
-        attendance: "Absensi Hari Ini",
-        employees: "Manajemen Karyawan",
-        reports: "Laporan Absensi",
-        settings: "Pengaturan Sistem",
-        schedule: "Jadwal Kerja",
-        notifications: "Notifikasi",
-        help: "Bantuan"
+    // DOM Elements for Camera Attendance
+    const elements = {
+        video: document.getElementById('video'),
+        canvas: document.getElementById('canvas'),
+        captureBtn: document.getElementById('captureBtn'),
+        photoInput: document.getElementById('photoInput'),
+        photoPreview: document.getElementById('photoPreview'),
+        statusMessage: document.getElementById('statusMessage'),
+        submitBtn: document.getElementById('submitBtn'),
+        form: document.getElementById('attendanceForm')
     };
 
-    const pageTitle = document.getElementById("pageTitle");
-    const breadcrumbCurrent = document.getElementById("breadcrumbCurrent");
-    
-    if (pageTitle) {
-        pageTitle.textContent = titles[sectionName] || "AttendPro";
-    }
-    if (breadcrumbCurrent) {
-        breadcrumbCurrent.textContent = titles[sectionName] || "Dashboard";
-    }
+    // State for Camera and Location
+    let state = {
+        stream: null,
+        cameraReady: false,
+        locationReady: false,
+        photoCaptured: false
+    };
 
-    // Close sidebar on mobile after navigation
-    if (window.innerWidth <= 768) {
-        closeSidebar();
-    }
-}
-
-// Mobile sidebar toggle
-function toggleSidebar() {
-    const sidebar = document.getElementById("sidebar");
-    const overlay = document.getElementById("sidebarOverlay");
-    
-    if (sidebar && overlay) {
-        if (sidebar.classList.contains("active")) {
-            closeSidebar();
-        } else {
-            openSidebar();
+    // Initialize Camera and Location if elements exist
+    function initializeCameraAttendance() {
+        if (elements.video && elements.canvas) {
+            initializeCameraAndLocation();
+            setupCameraEventListeners();
         }
     }
-}
 
-// Open sidebar
-function openSidebar() {
-    const sidebar = document.getElementById("sidebar");
-    const overlay = document.getElementById("sidebarOverlay");
-    
-    if (sidebar && overlay) {
-        sidebar.classList.add("active");
-        overlay.classList.add("active");
-        // Prevent body scroll when sidebar is open
-        document.body.style.overflow = "hidden";
-    }
-}
-
-// Close sidebar
-function closeSidebar() {
-    const sidebar = document.getElementById("sidebar");
-    const overlay = document.getElementById("sidebarOverlay");
-    
-    if (sidebar && overlay) {
-        sidebar.classList.remove("active");
-        overlay.classList.remove("active");
-        // Restore body scroll
-        document.body.style.overflow = "";
-    }
-}
-
-// Close sidebar when clicking outside on mobile
-document.addEventListener("click", function (e) {
-    const sidebar = document.getElementById("sidebar");
-    const menuBtn = document.querySelector(".mobile-menu-btn");
-    const overlay = document.getElementById("sidebarOverlay");
-
-    if (
-        window.innerWidth <= 768 &&
-        sidebar &&
-        menuBtn &&
-        !sidebar.contains(e.target) &&
-        !menuBtn.contains(e.target) &&
-        sidebar.classList.contains("active")
-    ) {
-        closeSidebar();
-    }
-});
-
-// Search functionality
-function initializeSearch() {
-    const searchInput = document.getElementById("searchInput");
-    if (searchInput) {
-        searchInput.addEventListener("input", function (e) {
-            const searchTerm = e.target.value.toLowerCase();
-            // Implement search logic here
-            console.log("Searching for:", searchTerm);
-            
-            if (searchTerm.length > 0) {
-                // You can add search results functionality here
-                // Example: filter employee list, reports, etc.
+    // Camera Functions - Sesuai dengan AttendanceController@cameraAttendance
+    function startCamera() {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            if (elements.statusMessage) {
+                elements.statusMessage.innerHTML = "❌ Browser tidak mendukung kamera!";
             }
-        });
-    }
-}
-
-// Notification system
-function showNotification(message, type = "success") {
-    let container = document.getElementById("notificationContainer");
-    
-    // Create container if it doesn't exist
-    if (!container) {
-        container = document.createElement("div");
-        container.id = "notificationContainer";
-        container.className = "notification-container";
-        document.body.appendChild(container);
-    }
-    
-    const notification = document.createElement("div");
-    notification.className = `notification ${type}`;
-    notification.innerHTML = `
-        <div style="font-weight: 600; margin-bottom: 0.5rem;">
-            ${
-                type === "success"
-                    ? "Berhasil!"
-                    : type === "error"
-                    ? "Error!"
-                    : type === "warning"
-                    ? "Peringatan!"
-                    : "Info!"
-            }
-        </div>
-        <div>${message}</div>
-    `;
-
-    container.appendChild(notification);
-
-    // Show notification
-    setTimeout(() => {
-        notification.classList.add("show");
-    }, 100);
-
-    // Hide notification
-    setTimeout(() => {
-        notification.classList.remove("show");
-        setTimeout(() => {
-            if (container.contains(notification)) {
-                container.removeChild(notification);
-            }
-        }, 300);
-    }, 4000);
-}
-
-// Action handlers
-function markAttendance() {
-    showNotification(
-        "Fitur tandai kehadiran akan segera tersedia!",
-        "success"
-    );
-}
-
-function viewReports() {
-    showSection("reports");
-    showNotification("Navigasi ke halaman laporan", "success");
-}
-
-function addEmployee() {
-    showNotification(
-        "Fitur tambah karyawan akan segera tersedia!",
-        "success"
-    );
-}
-
-function exportData() {
-    showNotification(
-        "Fitur export data akan segera tersedia!",
-        "success"
-    );
-}
-
-function viewDetails(employeeId) {
-    showNotification(
-        `Detail karyawan ${employeeId} akan ditampilkan`,
-        "success"
-    );
-}
-
-function showNotifications() {
-    showNotification("Anda memiliki 5 notifikasi baru", "success");
-    // You can implement actual notification panel here
-}
-
-function showProfile() {
-    showNotification(
-        "Profil pengguna akan segera tersedia!",
-        "success"
-    );
-}
-
-// Logout function (if needed for JavaScript logout)
-function logout() {
-    if (confirm("Apakah Anda yakin ingin keluar?")) {
-        showNotification(
-            "Logout berhasil. Sampai jumpa!",
-            "success"
-        );
-        setTimeout(() => {
-            // Redirect to logout route or submit logout form
-            const logoutForm = document.querySelector('form[action*="logout"]');
-            if (logoutForm) {
-                logoutForm.submit();
-            } else {
-                window.location.href = '/logout';
-            }
-        }, 1000);
-    }
-}
-
-// Auto-refresh data every 30 seconds
-setInterval(() => {
-    // Simulate data refresh
-    console.log("Refreshing attendance data...");
-    // You can implement actual data refresh logic here
-    // Example: fetch new attendance data via AJAX
-}, 30000);
-
-// Responsive handling
-window.addEventListener("resize", function () {
-    const sidebar = document.getElementById("sidebar");
-    if (window.innerWidth > 768 && sidebar) {
-        closeSidebar();
-    }
-});
-
-// Keyboard shortcuts
-document.addEventListener("keydown", function(e) {
-    // ESC key closes sidebar on mobile
-    if (e.key === "Escape" && window.innerWidth <= 768) {
-        closeSidebar();
-    }
-    
-    // Ctrl/Cmd + K opens search
-    if ((e.ctrlKey || e.metaKey) && e.key === "k") {
-        e.preventDefault();
-        const searchInput = document.getElementById("searchInput");
-        if (searchInput) {
-            searchInput.focus();
+            state.cameraReady = false;
+            updateButtonStates();
+            return;
         }
-    }
-});
 
-// Smooth scroll for internal links
-document.addEventListener("click", function(e) {
-    if (e.target.matches('a[href^="#"]')) {
-        e.preventDefault();
-        const target = document.querySelector(e.target.getAttribute("href"));
-        if (target) {
-            target.scrollIntoView({
-                behavior: "smooth",
-                block: "start"
+        // Prevent starting camera if stream is already active
+        if (state.stream) {
+            console.log("Camera stream already active, skipping...");
+            return;
+        }
+
+        if (elements.statusMessage) {
+            elements.statusMessage.innerHTML = "🔄 Meminta akses kamera...";
+        }
+        
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
+            .then(mediaStream => {
+                if (!elements.video) {
+                    if (elements.statusMessage) {
+                        elements.statusMessage.innerHTML = "❌ Elemen video tidak ditemukan!";
+                    }
+                    state.cameraReady = false;
+                    updateButtonStates();
+                    return;
+                }
+
+                // Ensure no existing stream is active
+                if (elements.video.srcObject) {
+                    elements.video.srcObject.getTracks().forEach(track => track.stop());
+                }
+
+                state.stream = mediaStream;
+                elements.video.srcObject = mediaStream;
+
+                // Tunggu metadata loaded sebelum play untuk mencegah AbortError
+                elements.video.addEventListener('loadedmetadata', () => {
+                    elements.video.play().then(() => {
+                        state.cameraReady = true;
+                        if (elements.statusMessage) {
+                            elements.statusMessage.innerHTML = "✅ Kamera aktif, siap mengambil foto!";
+                        }
+                        updateButtonStates();
+                    }).catch(err => {
+                        console.error('Video play error:', err);
+                        if (elements.statusMessage) {
+                            elements.statusMessage.innerHTML = `❌ Gagal memutar video: ${err.message}`;
+                        }
+                        state.cameraReady = false;
+                        updateButtonStates();
+                        stopCamera();
+                    });
+                }, { once: true }); // Listener hanya sekali
+            })
+            .catch(err => {
+                console.error('Gagal mengakses kamera:', err);
+                if (elements.statusMessage) {
+                    elements.statusMessage.innerHTML = `❌ Gagal mengakses kamera: ${err.message}`;
+                }
+                state.cameraReady = false;
+                updateButtonStates();
             });
+    }
+
+    function stopCamera() {
+        if (state.stream) {
+            state.stream.getTracks().forEach(track => track.stop());
+            state.stream = null;
+            if (elements.video) {
+                elements.video.srcObject = null;
+            }
         }
     }
+
+    // Location Functions - Sesuai dengan location validation di controller
+    function getLocation() {
+        if (!navigator.geolocation) {
+            if (elements.statusMessage) {
+                elements.statusMessage.innerHTML = "❌ Browser tidak mendukung geolocation! Silakan gunakan perangkat yang mendukung.";
+            }
+            state.locationReady = false;
+            updateButtonStates();
+            return;
+        }
+
+        if (elements.statusMessage) {
+            elements.statusMessage.innerHTML = "🔄 Meminta akses lokasi...";
+        }
+        
+        navigator.geolocation.getCurrentPosition(
+            position => {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                const accuracy = position.coords.accuracy;
+                console.log(`Latitude: ${lat}, Longitude: ${lon}, Accuracy: ${accuracy} meters`);
+                
+                const latInput = document.getElementById('latitude');
+                const lonInput = document.getElementById('longitude');
+                
+                if (latInput) latInput.value = lat;
+                if (lonInput) lonInput.value = lon;
+                
+                state.locationReady = true;
+                if (elements.statusMessage) {
+                    elements.statusMessage.innerHTML = `✅ Lokasi berhasil didapatkan! (Akurasi: ${accuracy.toFixed(1)} meter)`;
+                }
+                updateButtonStates();
+            },
+            error => {
+                console.error('Geolocation error:', error);
+                let errMsg = `❌ Gagal mendapatkan lokasi: ${error.message}`;
+                
+                if (error.code === error.PERMISSION_DENIED) {
+                    errMsg = `❌ Izin lokasi ditolak. Silakan aktifkan izin lokasi di pengaturan browser. <button onclick="getLocation()" class="btn btn-sm btn-primary">Coba Lagi</button>`;
+                } else if (error.code === error.POSITION_UNAVAILABLE) {
+                    errMsg = `❌ Lokasi tidak tersedia. Pastikan GPS aktif dan coba di area terbuka. <button onclick="getLocation()" class="btn btn-sm btn-primary">Coba Lagi</button>`;
+                } else if (error.code === error.TIMEOUT) {
+                    errMsg = `❌ Waktu habis untuk mendapatkan lokasi. Coba lagi. <button onclick="getLocation()" class="btn btn-sm btn-primary">Coba Lagi</button>`;
+                }
+                
+                if (elements.statusMessage) {
+                    elements.statusMessage.innerHTML = errMsg;
+                }
+                state.locationReady = false;
+                updateButtonStates();
+            },
+            { 
+                enableHighAccuracy: true, 
+                timeout: 15000, 
+                maximumAge: 0 
+            }
+        );
+    }
+
+    // Button States Management
+    function updateButtonStates() {
+        if (elements.captureBtn) {
+            elements.captureBtn.disabled = !(state.cameraReady && state.locationReady);
+        }
+        if (elements.submitBtn) {
+            elements.submitBtn.disabled = !(state.cameraReady && state.locationReady && state.photoCaptured);
+        }
+    }
+
+    // Capture Photo Function
+    function handleCapture() {
+        if (!elements.canvas || !elements.video) return;
+
+        elements.canvas.width = elements.video.videoWidth;
+        elements.canvas.height = elements.video.videoHeight;
+        elements.canvas.getContext('2d').drawImage(elements.video, 0, 0, elements.canvas.width, elements.canvas.height);
+
+        elements.canvas.toBlob(blob => {
+            const file = new File([blob], 'attendance.png', { type: 'image/png' });
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            
+            if (elements.photoInput) {
+                elements.photoInput.files = dataTransfer.files;
+            }
+
+            if (elements.photoPreview) {
+                elements.photoPreview.src = URL.createObjectURL(file);
+                elements.photoPreview.style.display = 'block';
+            }
+            
+            state.photoCaptured = true;
+            updateButtonStates();
+            
+            if (elements.statusMessage) {
+                elements.statusMessage.innerHTML = "✅ Foto berhasil diambil!";
+            }
+            stopCamera();
+        }, 'image/png', 0.8);
+    }
+
+    // Form Submission - Sesuai dengan AttendanceController@cameraAttendance
+    function handleFormSubmit(e) {
+        e.preventDefault();
+        
+        if (!state.photoCaptured) {
+            if (elements.statusMessage) {
+                elements.statusMessage.innerHTML = "❌ Harap ambil foto terlebih dahulu!";
+            }
+            return;
+        }
+
+        const formData = new FormData(elements.form);
+        
+        // Debug: Log form data
+        console.log('Form Data:');
+        for (let [key, value] of formData.entries()) {
+            console.log(key, value);
+        }
+        
+        // Get CSRF token from meta tag or Laravel object
+        const csrfToken = window.Laravel?.csrfToken || 
+                         document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        
+        if (!csrfToken) {
+            console.error('CSRF token tidak tersedia!');
+            if (elements.statusMessage) {
+                elements.statusMessage.innerHTML = "❌ CSRF token tidak tersedia. Silakan muat ulang halaman.";
+            }
+            if (elements.submitBtn) elements.submitBtn.disabled = false;
+            return;
+        }
+
+        formData.append('_token', csrfToken);
+
+        if (elements.submitBtn) elements.submitBtn.disabled = true;
+        if (elements.statusMessage) {
+            elements.statusMessage.innerHTML = "⏳ Mengirim absensi...";
+        }
+
+        // Route sesuai dengan AttendanceController@cameraAttendance
+        const url = window.Laravel?.attendanceRoute || '/attendance/camera';
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest', // Pastikan Laravel mengembalikan JSON
+                'X-CSRF-TOKEN': csrfToken
+            },
+            body: formData
+        })
+            .then(response => {
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                
+                // Store response status for later use
+                const responseStatus = response.status;
+                
+                // Check if response is actually JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error(`Server mengembalikan ${contentType} bukan JSON. Status: ${response.status}`);
+                }
+                
+                return response.json().then(data => {
+                    // Add status to data object
+                    data._responseStatus = responseStatus;
+                    return data;
+                });
+            })
+            .then(data => {
+                console.log('Response data:', data);
+                
+                if (data.success) {
+                    if (elements.statusMessage) {
+                        elements.statusMessage.innerHTML = `✅ ${data.message}`;
+                    }
+                    // Show success notification if available
+                    if (window.showNotification) {
+                        window.showNotification(data.message, "success");
+                    }
+                    setTimeout(() => location.reload(), 2000);
+                } else {
+                    let errMsg = data.message || 'Gagal mencatat absensi. Pastikan Anda berada di lokasi yang valid.';
+                    
+                    // Handle validation errors (422)
+                    if (data.errors) {
+                        console.error('Validation errors:', data.errors);
+                        errMsg = Object.values(data.errors).flat().join('<br>');
+                    }
+                    
+                    // Handle location errors (403)
+                    if (data._responseStatus === 403) {
+                        console.error('Location validation failed');
+                        errMsg += '<br><br><strong>Tips:</strong><ul>';
+                        errMsg += '<li>Pastikan GPS aktif dan akurat</li>';
+                        errMsg += '<li>Coba di area terbuka</li>';
+                        errMsg += '<li>Periksa pengaturan lokasi browser</li>';
+                        errMsg += '</ul>';
+                    }
+                    
+                    if (elements.statusMessage) {
+                        elements.statusMessage.innerHTML = `❌ ${errMsg} <button onclick="getLocation()" class="btn btn-sm btn-primary">Coba Lokasi Lagi</button>`;
+                    }
+                    if (elements.submitBtn) elements.submitBtn.disabled = false;
+                    
+                    // Show error notification if available
+                    if (window.showNotification) {
+                        window.showNotification(errMsg.replace(/<[^>]*>/g, ''), "error");
+                    }
+                }
+            })
+            .catch(err => {
+                console.error('Fetch error:', err);
+                
+                let errorMsg = 'Terjadi kesalahan saat mengirim absensi';
+                
+                if (err.message.includes('JSON')) {
+                    errorMsg = 'Server error - mungkin route tidak ditemukan atau CSRF token invalid';
+                } else if (err.message.includes('NetworkError') || err.message.includes('Failed to fetch')) {
+                    errorMsg = 'Masalah koneksi internet - coba lagi';
+                }
+                
+                if (elements.statusMessage) {
+                    elements.statusMessage.innerHTML = `❌ ${errorMsg}. <button onclick="location.reload()" class="btn btn-sm btn-primary">Muat Ulang</button>`;
+                }
+                if (elements.submitBtn) elements.submitBtn.disabled = false;
+                
+                // Show error notification if available
+                if (window.showNotification) {
+                    window.showNotification(errorMsg, "error");
+                }
+            });
+    }
+
+    // Event Listeners for Camera Attendance
+    function setupCameraEventListeners() {
+        if (elements.captureBtn) {
+            elements.captureBtn.addEventListener('click', handleCapture);
+        }
+
+        if (elements.form) {
+            elements.form.addEventListener('submit', handleFormSubmit);
+        }
+
+        // Cleanup camera stream when leaving page
+        window.addEventListener('beforeunload', stopCamera);
+    }
+
+    // Initialize Camera and Location
+    function initializeCameraAndLocation() {
+        getLocation();
+        startCamera();
+    }
+
+    // Expose functions globally for HTML onclick handlers
+    window.getLocation = getLocation;
+    window.startCamera = startCamera;
+    window.stopCamera = stopCamera;
+
+    // Auto-initialize if we're on camera attendance page
+    initializeCameraAttendance();
 });
-
-// Initialize tooltips (if you want to add them)
-function initializeTooltips() {
-    const tooltipElements = document.querySelectorAll('[data-tooltip]');
-    tooltipElements.forEach(element => {
-        element.addEventListener('mouseenter', showTooltip);
-        element.addEventListener('mouseleave', hideTooltip);
-    });
-}
-
-function showTooltip(e) {
-    const tooltip = document.createElement('div');
-    tooltip.className = 'tooltip';
-    tooltip.textContent = e.target.getAttribute('data-tooltip');
-    tooltip.style.cssText = `
-        position: absolute;
-        background: rgba(0,0,0,0.8);
-        color: white;
-        padding: 0.5rem;
-        border-radius: 4px;
-        font-size: 0.875rem;
-        pointer-events: none;
-        z-index: 1000;
-    `;
-    document.body.appendChild(tooltip);
-    
-    const rect = e.target.getBoundingClientRect();
-    tooltip.style.left = rect.left + (rect.width / 2) - (tooltip.offsetWidth / 2) + 'px';
-    tooltip.style.top = rect.top - tooltip.offsetHeight - 5 + 'px';
-    
-    e.target._tooltip = tooltip;
-}
-
-function hideTooltip(e) {
-    if (e.target._tooltip) {
-        document.body.removeChild(e.target._tooltip);
-        delete e.target._tooltip;
-    }
-}
-
-// Performance optimization: debounce function
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-}
-
-// Optimized search with debounce
-const debouncedSearch = debounce(function(searchTerm) {
-    // Implement actual search logic here
-    console.log("Performing search for:", searchTerm);
-}, 300);
-
-// Update search functionality to use debounced search
-function initializeSearch() {
-    const searchInput = document.getElementById("searchInput");
-    if (searchInput) {
-        searchInput.addEventListener("input", function (e) {
-            const searchTerm = e.target.value.toLowerCase();
-            debouncedSearch(searchTerm);
-        });
-    }
-}

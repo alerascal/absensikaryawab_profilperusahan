@@ -10,40 +10,22 @@
         });
     }, 5000);
 
-        // Form submission with animation
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const loginBtn = document.getElementById('loginBtn');
-            const loadingSpinner = document.getElementById('loadingSpinner');
-            const loginText = document.getElementById('loginText');
-            const successMessage = document.getElementById('successMessage');
-            
-            // Show loading state
-            loginBtn.disabled = true;
-            loadingSpinner.style.display = 'inline-block';
-            loginText.textContent = 'Memverifikasi...';
-            
-            // Simulate login process
-            setTimeout(() => {
-                loadingSpinner.style.display = 'none';
-                loginText.textContent = 'Berhasil!';
-                successMessage.style.display = 'block';
-                
-                // Simulate redirect after success
-                setTimeout(() => {
-                    loginText.textContent = 'Mengalihkan...';
-                    console.log('Redirecting to dashboard...');
-                }, 1000);
-                
-                // Reset button after animation
-                setTimeout(() => {
-                    loginBtn.disabled = false;
-                    loginText.textContent = 'Masuk ke Sistem';
-                    successMessage.style.display = 'none';
-                }, 3000);
-            }, 1500);
-        });
+      document.getElementById('loginForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const loginBtn = document.getElementById('loginBtn');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const loginText = document.getElementById('loginText');
+    const form = this;
+
+    loginBtn.disabled = true;
+    loadingSpinner.style.display = 'inline-block';
+    loginText.textContent = 'Memverifikasi...';
+
+    setTimeout(() => {
+        form.submit(); // submit form ke server Laravel
+    }, 500); // animasi singkat sebelum submit
+});
 
         // Biometric login handlers
         function setupBiometricButton(buttonId, message) {

@@ -1,4 +1,16 @@
-@extends('layouts.auth') @section('content')
+@extends('layouts.auth') 
+{{-- 
+========================================================
+👋 Halo, saya Moh Sahrul Alam Syah
+- Developer Laravel
+- Penawaran jasa pembuatan website, sistem informasi, dan aplikasi berbasis web
+- Jika tertarik silakan hubungi: 082220668915 (WhatsApp)
+
+Catatan: Komentar ini hanya terlihat di source code,
+tidak akan tampil di browser.
+========================================================
+--}}
+@section('content')
 <div class="login-container">
     <div class="login-header">
         <div class="logo">
