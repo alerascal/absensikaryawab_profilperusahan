@@ -47,7 +47,7 @@ class AttendanceReportService
             'user.department' => fn($q) => $q->select('id', 'name')
         ])->whereDate('date', $parsedDate)->get();
 
-        $pdf = Pdf::loadView('reports.data-absen-pdf', ['date' => $parsedDate, 'attendances' => $attendances])
+        $pdf = Pdf::loadView('reports.attendance_pdf', ['date' => $parsedDate, 'attendances' => $attendances])
             ->setPaper('A4', 'portrait');
         return $pdf->download('Laporan_Kehadiran_' . $parsedDate . '.pdf');
     }

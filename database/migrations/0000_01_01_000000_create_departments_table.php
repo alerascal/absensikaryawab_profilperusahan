@@ -11,8 +11,6 @@ class CreateDepartmentsTable extends Migration
         Schema::create('departments', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
-            $table->integer('jumlah')->nullable(); // Sesuaikan dengan kebutuhan
-            $table->decimal('persen', 5, 2)->nullable(); // Misalnya untuk persentase kehadiran
             $table->timestamps();
             $table->softDeletes();
         });

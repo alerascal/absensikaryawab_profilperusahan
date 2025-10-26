@@ -15,7 +15,7 @@
             </a>
         </div>
 
-        <!-- Alert Error -->
+        <!-- Error -->
         @if ($errors->any())
             <div class="mb-6 bg-red-50 border border-red-200 text-red-600 rounded-lg p-4 text-sm">
                 <ul class="list-disc pl-5 space-y-1">
@@ -30,11 +30,12 @@
         <form action="{{ route('admin.schedules.store') }}" method="POST" class="space-y-6">
             @csrf
 
-            <!-- Fulltime -->
+            <!-- Tipe Jadwal -->
             <div>
                 <label for="is_fulltime" class="block text-sm font-medium text-gray-700">Tipe Jadwal</label>
                 <select name="is_fulltime" id="is_fulltime"
-                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                        required>
                     <option value="1" {{ old('is_fulltime') == 1 ? 'selected' : '' }}>
                         Fulltime (Semua Karyawan, kecuali yang sudah punya shift)
                     </option>
@@ -42,6 +43,9 @@
                         Berdasarkan Shift
                     </option>
                 </select>
+                @error('is_fulltime')
+                    <span class="text-red-600 text-sm mt-1">{{ $message }}</span>
+                @enderror
             </div>
 
             <!-- Shift -->
@@ -49,7 +53,7 @@
                 <label for="shift_id" class="block text-sm font-medium text-gray-700">Pilih Shift</label>
                 <select name="shift_id" id="shift_id"
                         class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
-                    <option value="">-- Pilih Shift --</option>
+                    <option value="" disabled {{ old('shift_id') ? '' : 'selected' }}>-- Pilih Shift --</option>
                     @foreach($shifts as $shift)
                         <option value="{{ $shift->id }}" {{ old('shift_id') == $shift->id ? 'selected' : '' }}>
                             {{ $shift->name }} ({{ \Carbon\Carbon::parse($shift->start_time)->format('H:i') }} -
@@ -57,6 +61,9 @@
                         </option>
                     @endforeach
                 </select>
+                @error('shift_id')
+                    <span class="text-red-600 text-sm mt-1">{{ $message }}</span>
+                @enderror
             </div>
 
             <!-- Users -->
@@ -66,12 +73,15 @@
                     @foreach($users as $user)
                         <label class="flex items-center space-x-2 border rounded-lg p-2 hover:bg-gray-50 cursor-pointer">
                             <input type="checkbox" name="user_ids[]" value="{{ $user->id }}"
-                                   class="rounded text-indigo-600"
+                                   class="rounded text-indigo-600 focus:ring-indigo-500"
                                    {{ (is_array(old('user_ids')) && in_array($user->id, old('user_ids'))) ? 'checked' : '' }}>
                             <span class="text-sm text-gray-700">{{ $user->name }}</span>
                         </label>
                     @endforeach
                 </div>
+                @error('user_ids')
+                    <span class="text-red-600 text-sm mt-1">{{ $message }}</span>
+                @enderror
             </div>
 
             <!-- Start Time -->
@@ -81,6 +91,9 @@
                        value="{{ old('start_time') }}"
                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm"
                        required>
+                @error('start_time')
+                    <span class="text-red-600 text-sm mt-1">{{ $message }}</span>
+                @enderror
             </div>
 
             <!-- End Time -->
@@ -90,16 +103,49 @@
                        value="{{ old('end_time') }}"
                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm"
                        required>
+                @error('end_time')
+                    <span class="text-red-600 text-sm mt-1">{{ $message }}</span>
+                @enderror
             </div>
+            <!-- Hari Libur -->
+<div>
+    <label class="block text-sm font-medium text-gray-700">Hari Libur</label>
+    <div class="mt-2 grid grid-cols-2 sm:grid-cols-4 gap-2">
+        @php
+            $dayNames = [
+                1 => "Senin",
+                2 => "Selasa",
+                3 => "Rabu",
+                4 => "Kamis",
+                5 => "Jumat",
+                6 => "Sabtu",
+                7 => "Minggu",
+            ];
+        @endphp
+
+        @foreach($dayNames as $key => $day)
+            <label class="flex items-center space-x-2 border rounded-lg p-2 hover:bg-gray-50 cursor-pointer">
+                <input type="checkbox" name="holidays[]" value="{{ $key }}"
+                       class="rounded text-indigo-600 focus:ring-indigo-500"
+                       {{ (is_array(old('holidays')) && in_array($key, old('holidays'))) ? 'checked' : '' }}>
+                <span class="text-sm text-gray-700">{{ $day }}</span>
+            </label>
+        @endforeach
+    </div>
+    @error('holidays')
+        <span class="text-red-600 text-sm mt-1">{{ $message }}</span>
+    @enderror
+</div>
+
 
             <!-- Submit -->
             <div class="flex justify-end gap-3">
                 <button type="reset"
-                        class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
+                        class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition text-sm">
                     Reset
                 </button>
                 <button type="submit"
-                        class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">
+                        class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-sm">
                     Simpan Jadwal
                 </button>
             </div>
@@ -107,7 +153,7 @@
     </div>
 </div>
 
-<!-- Script Toggle -->
+<!-- Script -->
 <script>
 document.addEventListener("DOMContentLoaded", () => {
     const isFulltimeSelect = document.getElementById("is_fulltime");
@@ -118,6 +164,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (isFulltimeSelect.value === "1") {
             shiftGroup.classList.add("hidden");
             usersGroup.classList.add("hidden");
+            document.getElementById("shift_id").value = "";
+            document.querySelectorAll('input[name="user_ids[]"]').forEach(cb => cb.checked = false);
         } else {
             shiftGroup.classList.remove("hidden");
             usersGroup.classList.remove("hidden");

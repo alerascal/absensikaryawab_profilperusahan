@@ -11,7 +11,8 @@ class CreateHolidaysTable extends Migration
         Schema::create('holidays', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->date('date');
+            $table->date('date')->nullable(); // khusus tanggal tertentu
+            $table->unsignedTinyInteger('day_of_week')->nullable(); // 1=Senin, 7=Minggu
             $table->timestamps();
             $table->softDeletes();
         });

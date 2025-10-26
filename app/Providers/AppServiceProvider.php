@@ -7,21 +7,17 @@ use Illuminate\Support\Facades\View;
 use App\Services\AttendanceService;
 use App\Services\LocationService;
 use App\Services\AttendanceReportService;
+use Illuminate\Support\Facades\Cache;
+use Carbon\Carbon;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
-        // Binding services
-       $this->app->singleton(AttendanceService::class, function ($app) {
-    return new AttendanceService($app->make(LocationService::class));
-});
+        $this->app->singleton(AttendanceService::class, function ($app) {
+            return new AttendanceService($app->make(LocationService::class));
+        });
 
-
-        // Tambahkan binding untuk LocationService dan AttendanceReportService jika belum ada
         $this->app->singleton(LocationService::class, function ($app) {
             return new LocationService();
         });
@@ -31,18 +27,20 @@ class AppServiceProvider extends ServiceProvider
         });
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
-        // Bagikan variabel global ke semua view
         View::composer('*', function ($view) {
-            $attendanceService = app(AttendanceService::class);
+            $date = Carbon::today()->toDateString();
+            $attendanceCount = Cache::remember('attendance_count_' . $date, now()->addHours(1), function () {
+                return app(AttendanceService::class)->getTodayAttendanceCount();
+            });
+            $scheduleCount = Cache::remember('schedule_count_' . $date, now()->addHours(1), function () {
+                return app(AttendanceService::class)->getScheduleCount();
+            });
 
             $view->with([
-                'attendanceCount' => $attendanceService->getTodayAttendanceCount(),
-                'scheduleCount'   => $attendanceService->getScheduleCount(),
+                'attendanceCount' => $attendanceCount,
+                'scheduleCount' => $scheduleCount,
             ]);
         });
     }

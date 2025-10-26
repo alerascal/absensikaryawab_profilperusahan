@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Attendance;
 use Carbon\Carbon;
 
-class AttendanceController extends Controller
+class PegawaiController extends Controller
 {
     // Dashboard khusus Pegawai
     public function pegawaiDashboard()

@@ -1,0 +1,5 @@
+
+.gps-status.bg-success { background-color: #28a745; }
+.gps-status.bg-info { background-color: #17a2b8; }
+.gps-status.bg-warning { background-color: #ffc107; }
+.gps-status.bg-danger { background-color: #dc3545; }

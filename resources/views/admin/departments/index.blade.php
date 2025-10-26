@@ -30,13 +30,6 @@
                 {{ session('success') }}
             </div>
         @endif
-        <!-- Info Keterangan Kolom -->
-<div style="background: #e0f2fe; color: #0369a1; padding: 12px 16px; border-radius: 0.75rem; margin-bottom: 16px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); font-size: 14px;">
-    <strong>Keterangan:</strong> <br>
-    - <strong>Jumlah:</strong> Menunjukkan jumlah karyawan yang bekerja di departemen ini. <br>
-    - <strong>Persen:</strong> Menunjukkan persentase pencapaian target departemen dalam satu periode.
-</div>
-
 
         <!-- Table -->
         <div style="overflow-x:auto; -webkit-overflow-scrolling: touch; margin-top: 16px;">
@@ -45,8 +38,6 @@
                     <tr>
                         <th style="padding: 12px; text-align: center;">No</th>
                         <th style="padding: 12px; text-align: left;">Nama Departemen</th>
-                        <th style="padding: 12px; text-align: center;">Jumlah</th>
-                        <th style="padding: 12px; text-align: center;">Persen (%)</th>
                         <th style="padding: 12px; text-align: center;">Aksi</th>
                     </tr>
                 </thead>
@@ -55,8 +46,6 @@
                         <tr style="border-bottom: 1px solid #e5e7eb;">
                             <td style="padding: 12px; text-align: center;">{{ $key+1 }}</td>
                             <td style="padding: 12px;">{{ $department->name }}</td>
-                            <td style="padding: 12px; text-align: center;">{{ $department->jumlah }}</td>
-                            <td style="padding: 12px; text-align: center;">{{ $department->persen }}%</td>
                             <td style="padding: 12px; display: flex; justify-content: center; gap: 8px;">
                                 <a href="{{ route('admin.departments.edit', $department->id) }}" 
                                    style="display: flex; align-items: center; justify-content: center; width:36px; height:36px; background:#fde68a; color:#b45309; border-radius:9999px; transition: all 0.2s;" 
@@ -76,7 +65,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" style="text-align:center; padding:16px; color:#9ca3af;">Belum ada departemen</td>
+                            <td colspan="3" style="text-align:center; padding:16px; color:#9ca3af;">Belum ada departemen</td>
                         </tr>
                     @endforelse
                 </tbody>

@@ -39,11 +39,12 @@ class User extends Authenticatable
         return $this->belongsTo(Department::class);
     }
 
-    // Relasi ke Schedules (pivot table: schedule_user)
     public function schedules()
     {
-        return $this->belongsToMany(Schedule::class, 'schedule_user');
+        return $this->hasMany(Schedule::class);
     }
+
+
 
     // Relasi ke Attendances
     public function attendances()

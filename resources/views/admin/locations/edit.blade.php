@@ -3,54 +3,132 @@
 @section('title', 'Edit Lokasi Absensi')
 
 @section('content')
-<div class="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 font-sans">
-    <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-lg p-6 sm:p-8">
+<div class="content-wrapper">
+    <div class="page-container-form">
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb-nav">
+            <a href="{{ route('admin.locations.index') }}" class="breadcrumb-link">
+                <i class="fas fa-map-marker-alt"></i> Lokasi Absensi
+            </a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">Edit Lokasi</span>
+        </nav>
 
-        <h2 class="text-2xl font-bold text-gray-800 mb-6">Edit Lokasi Absensi</h2>
-
-        @if($errors->any())
-            <div class="mb-6 p-4 bg-red-100 text-red-700 rounded-lg">
-                <ul class="list-disc list-inside">
-                    @foreach($errors->all() as $e)
-                        <li>{{ $e }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-
-        <form action="{{ route('admin.locations.update', $location->id) }}" method="POST" class="space-y-4">
-            @csrf
-            @method('PUT')
-
-            <div>
-                <label class="block text-gray-700 font-medium mb-1">Nama Lokasi</label>
-                <input type="text" name="name" value="{{ $location->name }}"
-                       class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-            </div>
-
-            <div>
-                <label class="block text-gray-700 font-medium mb-1">Link Google Maps</label>
-                <input type="url" name="maps_link" value="https://www.google.com/maps/place/@{{ $location->latitude }},{{ $location->longitude }}"
-                       class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+        <!-- Form Card -->
+        <div class="card card-form">
+            <!-- Card Header -->
+            <div class="card-header-form">
+                <div class="header-icon header-icon-warning">
+                    <i class="fas fa-edit"></i>
+                </div>
+                <div class="header-text">
+                    <h1 class="form-title">Edit Lokasi Absensi</h1>
+                    <p class="form-subtitle">Perbarui detail lokasi absensi</p>
+                </div>
             </div>
 
-            <div>
-                <label class="block text-gray-700 font-medium mb-1">Radius (meter)</label>
-                <input type="number" name="radius" value="{{ $location->radius }}"
-                       class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-            </div>
+            <!-- Card Body -->
+            <div class="card-body-form">
+                @if ($errors->any())
+                    <div class="alert alert-error animate__animated animate__fadeIn">
+                        <div class="alert-icon">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </div>
+                        <div class="alert-content">
+                            <strong>Terdapat kesalahan:</strong>
+                            <ul class="error-list">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    </div>
+                @endif
 
-            <div class="flex gap-2">
-                <button type="submit"
-                        class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-200 font-medium flex-1 text-center">
-                    Update
-                </button>
-                <a href="{{ route('admin.locations.index') }}"
-                   class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition duration-200 flex-1 text-center">
-                   Batal
-                </a>
+                <form action="{{ route('admin.locations.update', $location->id) }}" method="POST" class="form-modern">
+                    @csrf
+                    @method('PUT')
+                    
+                    <!-- Nama Lokasi -->
+                    <div class="form-group">
+                        <label for="name" class="form-label">
+                            <i class="fas fa-map-marker-alt label-icon"></i>
+                            Nama Lokasi
+                            <span class="required">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            name="name" 
+                            id="name" 
+                            class="form-control" 
+                            value="{{ old('name', $location->name) }}" 
+                            placeholder="Contoh: Kantor Pusat Jakarta"
+                            required
+                        >
+                        <small class="form-hint">Masukkan nama lokasi yang mudah dikenali</small>
+                    </div>
+
+                    <!-- Link Google Maps -->
+                    <div class="form-group">
+                        <label for="maps_link" class="form-label">
+                            <i class="fas fa-link label-icon"></i>
+                            Link Google Maps
+                            <span class="required">*</span>
+                        </label>
+                        <input 
+                            type="url" 
+                            name="maps_link" 
+                            id="maps_link" 
+                            class="form-control" 
+                            value="{{ old('maps_link', $location->maps_link) }}" 
+                            placeholder="https://www.google.com/maps/@-6.8695717,109.1251033,15z"
+                            required
+                        >
+                        <small class="form-hint">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            Di Laptop Salin link dari url Google Maps (klik kanan > Copy link to this location)
+                        </small>
+                    </div>
+
+                    <!-- Radius -->
+                    <div class="form-group">
+                        <label for="radius" class="form-label">
+                            <i class="fas fa-bullseye label-icon"></i>
+                            Radius
+                            <span class="required">*</span>
+                        </label>
+                        <div class="input-with-suffix">
+                            <input 
+                                type="number" 
+                                name="radius" 
+                                id="radius" 
+                                class="form-control" 
+                                value="{{ old('radius', $location->radius) }}" 
+                                min="50" 
+                                max="1000" 
+                                required
+                            >
+                            <span class="input-suffix">meter</span>
+                        </div>
+                        <small class="form-hint">Jarak maksimal dari lokasi (50 - 1000 meter)</small>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="form-actions">
+                        <a href="{{ route('admin.locations.index') }}" class="btn btn-secondary">
+                            <i class="fas fa-times mr-2"></i>
+                            Batal
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save mr-2"></i>
+                            Update Lokasi
+                        </button>
+                    </div>
+                </form>
             </div>
-        </form>
+        </div>
     </div>
 </div>
 @endsection
+
+

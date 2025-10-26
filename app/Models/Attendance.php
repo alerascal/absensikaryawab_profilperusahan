@@ -150,4 +150,9 @@ class Attendance extends Model
     {
         return $query->whereBetween('date', [$startDate, $endDate]);
     }
+       public function pengajuan()
+    {
+        return $this->belongsTo(Pengajuan::class, 'user_id', 'user_id')
+            ->whereDate('created_at', $this->date);
+    }
 }

@@ -1,4 +1,4 @@
-<!-- Modified Sidebar with New Navlink -->
+<!-- Modified Sidebar with Correct Navlink Routes -->
 <nav class="sidebar bg-white shadow-md" id="sidebar">
     <!-- Logo -->
     <div class="logo-section p-4 border-b">
@@ -58,17 +58,24 @@
                 </li>
                 <li class="nav-item">
                     <a
-                        href="{{ route('admin.attendance.index') }}"
-                        class="nav-link {{ request()->routeIs('admin.attendance.*') ? 'active' : '' }}"
+                        href="{{ route('attendance.my') }}"
+                        class="nav-link {{ request()->routeIs('attendance.my') ? 'active' : '' }}"
                     >
-                        <i class="fas fa-calendar-check"></i> Data Absensi
-                        <span class="nav-badge">{{ $attendanceCount ?? 0 }}</span>
+                        <i class="fas fa-history"></i> Riwayat Absensi
                     </a>
                 </li>
                 <li class="nav-item">
                     <a
-                        href="{{ route('employees.index') }}"
-                        class="nav-link {{ request()->routeIs('employees.*') ? 'active' : '' }}"
+                        href="{{ route('admin.attendance.index') }}"
+                        class="nav-link {{ request()->routeIs('admin.attendance.*') ? 'active' : '' }}"
+                    >
+                        <i class="fas fa-calendar-check"></i> Data Absensi Pegawai
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a
+                        href="{{ route('admin.employees.index') }}"
+                        class="nav-link {{ request()->routeIs('admin.employees.*') ? 'active' : '' }}"
                     >
                         <i class="fas fa-users"></i> Karyawan
                     </a>
@@ -85,7 +92,7 @@
                 <li class="nav-item">
                     <a
                         href="{{ route('admin.pengajuan.index') }}"
-                        class="nav-link {{ request()->routeIs('admin.pengajuan.*') ? 'active' : '' }}"
+                        class="nav-link {{ request()->routeIs('admin.pengajuan.index') ? 'active' : '' }}"
                     >
                         <i class="fas fa-file-alt"></i> Daftar Pengajuan
                     </a>
@@ -100,9 +107,12 @@
                         aria-expanded="{{ request()->routeIs('reports.*') ? 'true' : 'false' }}"
                         aria-controls="reportsMenu"
                     >
-                        <span><i class="fas fa-chart-bar"></i> Laporan</span>
-                        <i class="fas fa-chevron-down"></i>
+                        <span
+                            ><i class="fas fa-chart-bar me-2"></i> Laporan</span
+                        >
+                        <i class="fas fa-chevron-down small"></i>
                     </a>
+
                     <ul
                         class="collapse list-unstyled ps-3 {{ request()->routeIs('reports.*') ? 'show' : '' }}"
                         id="reportsMenu"
@@ -110,25 +120,19 @@
                         <li>
                             <a
                                 href="{{ route('reports.attendance') }}"
-                                class="nav-link {{ request()->routeIs('reports.attendance') ? 'active' : '' }}"
+                                class="nav-link {{ request()->routeIs('reports.attendance') ? 'active fw-bold text-primary' : '' }}"
                             >
-                                <i class="fas fa-list"></i> Kehadiran Harian
+                                <i class="fas fa-list me-2"></i> Kehadiran
+                                Harian
                             </a>
                         </li>
                         <li>
                             <a
                                 href="{{ route('reports.monthly') }}"
-                                class="nav-link {{ request()->routeIs('reports.monthly') ? 'active' : '' }}"
+                                class="nav-link {{ request()->routeIs('reports.monthly') ? 'active fw-bold text-primary' : '' }}"
                             >
-                                <i class="fas fa-calendar"></i> Rekap Bulanan
-                            </a>
-                        </li>
-                        <li>
-                            <a
-                                href="{{ route('reports.other') }}"
-                                class="nav-link {{ request()->routeIs('reports.other') ? 'active' : '' }}"
-                            >
-                                <i class="fas fa-briefcase"></i> Lembur & Cuti
+                                <i class="fas fa-calendar me-2"></i> Rekap
+                                Bulanan
                             </a>
                         </li>
                     </ul>

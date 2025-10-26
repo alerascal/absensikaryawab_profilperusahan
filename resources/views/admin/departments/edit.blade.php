@@ -4,60 +4,48 @@
 
 @section('content')
 <div class="main-content" style="padding: 24px; font-family: 'Inter', sans-serif; background: #f4f7fc;">
-    <div class="form-panel" style="background: #fff; border-radius: 1rem; padding: 24px; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
+
+    <div class="attendance-panel" 
+         style="background: #fff; border-radius: 1rem; padding: 24px; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
 
         <!-- Header -->
-        <h1 style="font-size: 24px; font-weight: 600; color: #1f2937; margin-bottom: 8px;">Edit Departemen</h1>
-        <p style="color: #6b7280; margin-bottom: 24px;">Ubah informasi departemen</p>
-
-        <!-- Alert -->
-        @if($errors->any())
-            <div style="background: #fee2e2; color: #b91c1c; padding: 12px 16px; border-radius: 0.75rem; margin-bottom: 16px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
-                <ul style="margin: 0; padding-left: 20px;">
-                    @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <div>
+                <h1 style="font-size: 24px; font-weight: 600; color: #1f2937;">Edit Departemen</h1>
+                <p style="color: #6b7280;">Ubah data departemen</p>
             </div>
-        @endif
+            <a href="{{ route('admin.departments.index') }}" 
+               style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; background: #6b7280; color: #fff; border-radius: 0.75rem; font-weight: 500; text-decoration: none; transition: all 0.3s;"
+               onmouseover="this.style.background='#4b5563'; this.style.transform='scale(1.05)';" 
+               onmouseout="this.style.background='#6b7280'; this.style.transform='scale(1)';">
+                <i class="fas fa-arrow-left"></i> Kembali
+            </a>
+        </div>
 
         <!-- Form -->
-        <form action="{{ route('admin.departments.update', $department->id) }}" method="POST" style="display: flex; flex-direction: column; gap: 16px;">
+        <form action="{{ route('admin.departments.update', $department->id) }}" method="POST">
             @csrf
             @method('PUT')
 
-            <div style="display: flex; flex-direction: column; gap: 4px;">
-                <label for="name" style="font-weight: 500; color: #374151;">Nama Departemen</label>
-                <input type="text" name="name" id="name" value="{{ old('name', $department->name) }}" required
-                       style="padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 0.5rem; transition: all 0.3s; width: 100%;"
-                       onfocus="this.style.borderColor='#6366f1';" onblur="this.style.borderColor='#d1d5db';">
-            </div>
+            <div style="display: flex; flex-direction: column; gap: 16px;">
 
-            <div style="display: flex; flex-direction: column; gap: 4px;">
-                <label for="jumlah" style="font-weight: 500; color: #374151;">Jumlah</label>
-                <input type="number" name="jumlah" id="jumlah" value="{{ old('jumlah', $department->jumlah) }}" required
-                       style="padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 0.5rem; transition: all 0.3s; width: 100%;"
-                       onfocus="this.style.borderColor='#6366f1';" onblur="this.style.borderColor='#d1d5db';">
-            </div>
+                <!-- Nama Departemen -->
+                <div>
+                    <label for="name" style="display: block; font-weight: 500; color: #374151; margin-bottom: 8px;">Nama Departemen</label>
+                    <input type="text" name="name" id="name" required 
+                           style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 0.75rem; background: #f9fafb; color: #111827; transition: all 0.2s;"
+                           placeholder="Masukkan nama departemen" value="{{ old('name', $department->name) }}">
+                    @error('name')
+                        <p style="color: #ef4444; font-size: 14px; margin-top: 4px;">{{ $message }}</p>
+                    @enderror
+                </div>
 
-            <div style="display: flex; flex-direction: column; gap: 4px;">
-                <label for="persen" style="font-weight: 500; color: #374151;">Persen (%)</label>
-                <input type="number" name="persen" id="persen" value="{{ old('persen', $department->persen) }}" required
-                       style="padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 0.5rem; transition: all 0.3s; width: 100%;"
-                       onfocus="this.style.borderColor='#6366f1';" onblur="this.style.borderColor='#d1d5db';">
-            </div>
-
-            <div style="display: flex; gap: 12px; margin-top: 16px;">
-                <a href="{{ route('admin.departments.index') }}" 
-                   style="padding: 8px 16px; background: #f3f4f6; color: #374151; border-radius: 0.5rem; text-decoration: none; font-weight: 500; transition: all 0.3s;"
-                   onmouseover="this.style.background='#e5e7eb';" onmouseout="this.style.background='#f3f4f6';">
-                    Kembali
-                </a>
+                <!-- Submit Button -->
                 <button type="submit" 
-                        style="padding: 8px 16px; background: #4f46e5; color: #fff; border-radius: 0.5rem; font-weight: 500; border: none; cursor: pointer; transition: all 0.3s;"
+                        style="padding: 12px 24px; background: #4f46e5; color: #fff; border-radius: 0.75rem; font-weight: 500; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.3s;"
                         onmouseover="this.style.background='#4338ca'; this.style.transform='scale(1.05)';" 
                         onmouseout="this.style.background='#4f46e5'; this.style.transform='scale(1)';">
-                    Update
+                    Update Departemen
                 </button>
             </div>
         </form>

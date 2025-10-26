@@ -1,105 +1,195 @@
 @extends('layouts.app')
 
-@section('title', 'Kelola Lokasi Absensi')
+@section('title', 'Manajemen Lokasi Absensi')
 
 @section('content')
-<div class="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 font-sans">
-    <div class="max-w-6xl mx-auto bg-white rounded-2xl shadow-lg p-6 sm:p-8">
-
-        <!-- Header -->
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-            <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">📍 Kelola Lokasi Absensi</h1>
-            <a href="{{ route('admin.locations.create') }}"
-               class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200 font-medium">
-                + Tambah Lokasi
-            </a>
+<div class="content-wrapper">
+    <div class="page-container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="header-content">
+                <div class="header-text">
+                    <h1 class="page-title">
+                        <i class="fas fa-map-marker-alt mr-2"></i>
+                        Manajemen Lokasi Absensi
+                    </h1>
+                    <p class="page-subtitle">Kelola lokasi yang diizinkan untuk absensi</p>
+                </div>
+                <div class="header-actions">
+                    <a href="{{ route('admin.locations.create') }}" class="btn btn-primary btn-add">
+                        <i class="fas fa-plus-circle mr-2"></i>
+                        <span>Tambah Lokasi</span>
+                    </a>
+                </div>
+            </div>
         </div>
 
-        <!-- Success Message -->
-        @if(session('success'))
-            <div class="mb-6 p-4 bg-green-100 text-green-700 rounded-lg font-medium flex items-center">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-                <span>{{ session('success') }}</span>
+        <!-- Alert Messages -->
+        @if (session('success'))
+            <div class="alert alert-success alert-dismissible fade show animate__animated animate__fadeInDown" role="alert">
+                <div class="alert-content">
+                    <i class="fas fa-check-circle alert-icon"></i>
+                    <span>{{ session('success') }}</span>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         @endif
 
-        <!-- Table (Desktop) -->
-        <div class="hidden md:block overflow-x-auto border border-gray-200 rounded-lg">
-            <table class="w-full table-auto text-left">
-                <thead class="bg-gray-100 text-gray-600 sticky top-0 z-10">
-                    <tr>
-                        <th class="px-4 py-3 text-sm font-semibold uppercase">Nama</th>
-                        <th class="px-4 py-3 text-sm font-semibold uppercase">Latitude</th>
-                        <th class="px-4 py-3 text-sm font-semibold uppercase">Longitude</th>
-                        <th class="px-4 py-3 text-sm font-semibold uppercase">Radius (m)</th>
-                        <th class="px-4 py-3 text-sm font-semibold uppercase">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody class="text-gray-700">
-                    @forelse($locations as $loc)
-                        <tr class="hover:bg-gray-50 transition duration-150">
-                            <td class="border-t px-4 py-3 font-medium">{{ $loc->name }}</td>
-                            <td class="border-t px-4 py-3">{{ $loc->latitude }}</td>
-                            <td class="border-t px-4 py-3">{{ $loc->longitude }}</td>
-                            <td class="border-t px-4 py-3">
-                                <span class="inline-block bg-indigo-100 text-indigo-800 rounded-full px-3 py-1 text-sm">
-                                    {{ $loc->radius }} m
-                                </span>
-                            </td>
-                            <td class="border-t px-4 py-3 flex gap-2">
-                                <a href="{{ route('admin.locations.edit', $loc->id) }}"
-                                   class="px-3 py-1 bg-yellow-400 text-white rounded-lg hover:bg-yellow-500 transition duration-200 text-sm">Edit</a>
-                                <form action="{{ route('admin.locations.destroy', $loc->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Hapus lokasi ini?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit"
-                                            class="px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-200 text-sm">Hapus</button>
-                                </form>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="5" class="border-t px-4 py-3 text-center text-gray-500">Belum ada lokasi absensi</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
+        @if (session('error'))
+            <div class="alert alert-danger alert-dismissible fade show animate__animated animate__fadeInDown" role="alert">
+                <div class="alert-content">
+                    <i class="fas fa-exclamation-circle alert-icon"></i>
+                    <span>{{ session('error') }}</span>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
 
-        <!-- Card (Mobile) -->
-        <div class="md:hidden space-y-4">
-            @forelse($locations as $loc)
-                <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm animate-fade-in">
-                    <div class="grid grid-cols-2 gap-2 text-sm text-gray-700">
-                        <div class="font-semibold">Nama:</div>
-                        <div>{{ $loc->name }}</div>
-                        <div class="font-semibold">Latitude:</div>
-                        <div>{{ $loc->latitude }}</div>
-                        <div class="font-semibold">Longitude:</div>
-                        <div>{{ $loc->longitude }}</div>
-                        <div class="font-semibold">Radius:</div>
-                        <div>
-                            <span class="inline-block bg-indigo-100 text-indigo-800 rounded-full px-2 py-1 text-xs">{{ $loc->radius }} m</span>
+        <!-- Content Card -->
+        <div class="card card-modern">
+            <div class="card-body">
+                @if ($locations->isEmpty())
+                    <div class="empty-state">
+                        <div class="empty-state-icon">
+                            <i class="fas fa-map-marked-alt"></i>
+                        </div>
+                        <h3 class="empty-state-title">Belum ada lokasi absensi</h3>
+                        <p class="empty-state-text">Mulai dengan menambahkan lokasi pertama untuk sistem absensi</p>
+                        <a href="{{ route('admin.locations.create') }}" class="btn btn-primary btn-add mt-3">
+                            <i class="fas fa-plus-circle mr-2"></i>
+                            Tambah Lokasi Pertama
+                        </a>
+                    </div>
+                @else
+                    <!-- Desktop Table -->
+                    <div class="table-responsive d-none d-lg-block">
+                        <table class="table table-modern">
+                            <thead>
+                                <tr>
+                                    <th width="5%">
+                                        <i class="fas fa-hashtag"></i>
+                                    </th>
+                                    <th width="35%">
+                                        <i class="fas fa-map-marker-alt mr-2"></i>Nama Lokasi
+                                    </th>
+                                    <th width="30%">
+                                        <i class="fas fa-crosshairs mr-2"></i>Koordinat
+                                    </th>
+                                    <th width="15%" class="text-center">
+                                        <i class="fas fa-circle-notch mr-2"></i>Radius
+                                    </th>
+                                    <th width="15%" class="text-center">
+                                        <i class="fas fa-cog mr-2"></i>Aksi
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($locations as $index => $location)
+                                    <tr class="animate__animated animate__fadeIn">
+                                        <td>
+                                            <div class="table-number">{{ $locations->firstItem() + $index }}</div>
+                                        </td>
+                                        <td>
+                                            <div class="location-name">
+                                                <div class="location-badge"></div>
+                                                <span>{{ $location->name }}</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="coordinate-text">
+                                                <i class="fas fa-map-pin text-danger mr-2"></i>
+                                                <span>{{ $location->latitude }}, {{ $location->longitude }}</span>
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge badge-radius">
+                                                <i class="fas fa-bullseye mr-1"></i>{{ $location->radius }}m
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="action-buttons">
+                                                <a href="{{ route('admin.locations.edit', $location->id) }}" 
+                                                   class="btn btn-action btn-edit" 
+                                                   title="Edit Lokasi">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <form action="{{ route('admin.locations.destroy', $location->id) }}" 
+                                                      method="POST" 
+                                                      class="d-inline"
+                                                      onsubmit="return confirm('Yakin ingin menghapus lokasi ini?')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" 
+                                                            class="btn btn-action btn-delete" 
+                                                            title="Hapus Lokasi">
+                                                        <i class="fas fa-trash-alt"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Mobile Cards -->
+                    <div class="d-lg-none">
+                        <div class="mobile-cards">
+                            @foreach ($locations as $index => $location)
+                                <div class="location-card animate__animated animate__fadeIn">
+                                    <div class="card-header-mobile">
+                                        <div class="card-title-mobile">
+                                            <div class="location-badge-mobile"></div>
+                                            <h4>{{ $location->name }}</h4>
+                                        </div>
+                                        <span class="badge badge-radius-mobile">
+                                            <i class="fas fa-bullseye mr-1"></i>{{ $location->radius }}m
+                                        </span>
+                                    </div>
+                                    
+                                    <div class="card-body-mobile">
+                                        <div class="info-row">
+                                            <div class="info-label">
+                                                <i class="fas fa-map-pin"></i>
+                                                Koordinat
+                                            </div>
+                                            <div class="info-value coordinate-text-mobile">
+                                                {{ $location->latitude }}, {{ $location->longitude }}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="card-footer-mobile">
+                                        <a href="{{ route('admin.locations.edit', $location->id) }}" 
+                                           class="btn btn-action-mobile btn-edit-mobile">
+                                            <i class="fas fa-edit mr-1"></i> Edit
+                                        </a>
+                                        <form action="{{ route('admin.locations.destroy', $location->id) }}" 
+                                              method="POST" 
+                                              class="d-inline"
+                                              onsubmit="return confirm('Yakin ingin menghapus lokasi ini?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-action-mobile btn-delete-mobile">
+                                                <i class="fas fa-trash-alt mr-1"></i> Hapus
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            @endforeach
                         </div>
                     </div>
-                    <div class="mt-4 flex gap-2">
-                        <a href="{{ route('admin.locations.edit', $loc->id) }}"
-                           class="flex-1 text-center px-3 py-2 bg-yellow-400 text-white rounded-lg hover:bg-yellow-500 transition duration-200 text-sm">Edit</a>
-                        <form action="{{ route('admin.locations.destroy', $loc->id) }}" method="POST" class="flex-1" onsubmit="return confirm('Hapus lokasi ini?')">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit"
-                                    class="w-full px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-200 text-sm">Hapus</button>
-                        </form>
-                    </div>
-                </div>
-            @empty
-                <div class="text-center text-gray-500 p-4">Belum ada lokasi absensi</div>
-            @endforelse
-        </div>
 
+                    <!-- Pagination -->
+                    @if($locations->hasPages())
+                        <div class="pagination-wrapper">
+                            {{ $locations->links() }}
+                        </div>
+                    @endif
+                @endif
+            </div>
+        </div>
     </div>
 </div>
 @endsection

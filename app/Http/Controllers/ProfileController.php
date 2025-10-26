@@ -5,31 +5,31 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use app\Models\Attendance;
+use App\Models\Attendance; // ✅ perbaikan namespace
 
 class ProfileController extends Controller
 {
-    // Tampilkan profil user login
+    // ✅ Tampilkan profil user login
     public function index()
     {
         $user = Auth::user();
 
         // Hitung data absensi
-        $user->attendances_count = $user->attendances()->count(); 
+        $user->attendances_count = $user->attendances()->count();
         $user->late_count = $user->attendances()->where('status', 'late')->count();
         $user->leave_count = $user->attendances()->where('status', 'leave')->count();
 
         return view('settings.index', compact('user'));
     }
 
-    // Form edit data
+    // ✅ Form edit data
     public function edit()
     {
         $user = Auth::user();
         return view('settings.edit', compact('user'));
     }
 
-    // Update data user
+    // ✅ Update data user
     public function update(Request $request)
     {
         $user = Auth::user();
@@ -64,12 +64,12 @@ class ProfileController extends Controller
         return redirect()->route('settings.index')->with('success', 'Profil berhasil diperbarui!');
     }
 
-    // Hapus akun (absensi TIDAK dihapus)
+    // ✅ Hapus akun (absensi TIDAK dihapus)
     public function destroy()
     {
         $user = Auth::user();
 
-        // ❌ Jangan hapus absensi
+        // Jangan hapus absensi
         $user->delete();
 
         Auth::logout();

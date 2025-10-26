@@ -15,13 +15,6 @@ class DepartmentController extends Controller
         return view('admin.departments.index', compact('departments'));
     }
 
-    // API: Best departments
-    public function bestDepartments()
-    {
-        $departments = Department::orderBy('persen', 'desc')->get();
-        return response()->json($departments);
-    }
-
     // Form tambah
     public function create()
     {
@@ -32,9 +25,7 @@ class DepartmentController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name'   => 'required|string|max:255',
-            'jumlah' => 'required|integer|min:1',
-            'persen' => 'required|integer|min:0|max:100',
+            'name' => 'required|string|max:255|unique:departments,name',
         ]);
 
         Department::create($request->all());
@@ -53,9 +44,7 @@ class DepartmentController extends Controller
     public function update(Request $request, Department $department)
     {
         $request->validate([
-            'name'   => 'required|string|max:255',
-            'jumlah' => 'required|integer|min:1',
-            'persen' => 'required|integer|min:0|max:100',
+            'name' => 'required|string|max:255|unique:departments,name,' . $department->id,
         ]);
 
         $department->update($request->all());
@@ -72,21 +61,4 @@ class DepartmentController extends Controller
         return redirect()->route('admin.departments.index')
                          ->with('success', 'Departemen berhasil dihapus');
     }
-   public function topDepartments()
-{
-    $departments = \App\Models\Department::orderBy('persen', 'desc')->get();
-
-    // Format data untuk frontend
-    $data = $departments->map(function($d){
-        return [
-            'nama' => $d->nama,
-            'jumlah' => $d->jumlah ?? 0, // jumlah karyawan di departemen
-            'persen' => $d->persen ?? 0,
-        ];
-    });
-
-    return response()->json($data);
-}
-
-
 }

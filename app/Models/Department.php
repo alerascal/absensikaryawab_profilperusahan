@@ -12,8 +12,7 @@ class Department extends Model
 
     protected $fillable = [
         'name',
-        'jumlah',
-        'persen',
+       
     ];
 
     // Relasi ke Users

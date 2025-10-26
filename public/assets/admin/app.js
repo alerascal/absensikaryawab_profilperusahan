@@ -11,8 +11,44 @@ document.addEventListener('DOMContentLoaded', () => {
         searchInput: document.getElementById("searchInput")
     };
 
+    // Initialize TensorFlow.js Backend (hanya sekali)
+    async function initializeTensorFlow() {
+        if (window.tfInitialized) {
+            console.log("TensorFlow.js sudah diinisialisasi");
+            return;
+        }
+        try {
+            // Cek backend tanpa menggunakan tf.engine().registry.has
+            const currentBackend = tf.getBackend();
+            if (!currentBackend || currentBackend !== 'webgl') {
+                await tf.setBackend('webgl');
+                await tf.ready();
+                console.log("Backend: WebGL ✅");
+            } else {
+                console.log("Backend WebGL sudah terdaftar");
+            }
+        } catch (err) {
+            console.warn("WebGL gagal ❌, fallback ke CPU", err);
+            try {
+                const currentBackend = tf.getBackend();
+                if (!currentBackend || currentBackend !== 'cpu') {
+                    await tf.setBackend('cpu');
+                    await tf.ready();
+                    console.log("Backend: CPU ✅");
+                } else {
+                    console.log("Backend CPU sudah terdaftar");
+                }
+            } catch (cpuErr) {
+                console.error("Gagal mengatur backend CPU:", cpuErr);
+                showNotification("Gagal menginisialisasi TensorFlow.js", "error");
+            }
+        }
+        window.tfInitialized = true; // Tandai bahwa TensorFlow.js sudah diinisialisasi
+    }
+
     // Initialize Application
-    function initializeApp() {
+    async function initializeApp() {
+        await initializeTensorFlow(); // Inisialisasi TensorFlow.js
         hideLoadingOverlay();
         initializeClock();
         initializeSearch();
@@ -94,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Navigation - Sesuai dengan controller routes
+    // Navigation
     function showSection(sectionName) {
         document.querySelectorAll(".content-section").forEach(section => {
             section.style.display = "none";
@@ -110,15 +146,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         const titles = {
-            dashboard: "Dashboard Absensi",
-            attendance: "Absensi Hari Ini", // Sesuai AttendanceController@index
-            employees: "Manajemen Karyawan", // Sesuai AttendanceController@users
-            reports: "Laporan Absensi", // Sesuai AttendanceController@showAttendancePage
+            dashboard: "Dashboard",
+            employees: "Manajemen Karyawan",
+            reports: "Laporan",
             settings: "Pengaturan Sistem",
             schedule: "Jadwal Kerja",
             notifications: "Notifikasi",
             help: "Bantuan",
-            locations: "Lokasi Absensi" // Sesuai AttendanceController@locations
+            locations: "Lokasi"
         };
 
         const pageTitle = document.getElementById("pageTitle");
@@ -144,7 +179,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const debouncedSearch = debounce((searchTerm) => {
         console.log("Performing search for:", searchTerm);
-        // Implementasi pencarian bisa disesuaikan dengan kebutuhan
     }, 300);
 
     function debounce(func, wait) {
@@ -235,55 +269,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Business Logic Functions - Sesuai dengan Controller Methods
-    function markAttendance() {
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute("content");
-        if (!csrfToken) {
-            showNotification("CSRF token tidak tersedia", "error");
-            return;
-        }
-
-        // Sesuai dengan AttendanceController@store
-        fetch("/admin/attendance", {
-            method: "POST",
-            headers: {
-                "X-CSRF-TOKEN": csrfToken,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ status: "Hadir" })
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showNotification(`${data.message}`, "success");
-                } else {
-                    showNotification("Gagal menandai absensi", "error");
-                }
-            })
-            .catch(error => {
-                console.error("Error:", error);
-                showNotification("Terjadi error saat request", "error");
-            });
-    }
-
+    // Business Logic Functions
     function viewReports() {
-        // Sesuai dengan AttendanceController@showAttendancePage
         showSection("reports");
         showNotification("Navigasi ke halaman laporan", "success");
     }
 
     function addEmployee() {
-        // Sesuai dengan AttendanceController@users
         showNotification("Fitur tambah karyawan akan segera tersedia!", "success");
     }
 
     function exportData() {
-        // Sesuai dengan AttendanceController@downloadPdf atau monthlyPdf
         showNotification("Fitur export data akan segera tersedia!", "success");
     }
 
     function viewDetails(employeeId) {
-        // Sesuai dengan AttendanceController@show
         showNotification(`Detail karyawan ${employeeId} akan ditampilkan`, "success");
     }
 
@@ -352,10 +352,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Expose functions globally for HTML onclick handlers
+    // Expose functions globally
     window.toggleSidebar = toggleSidebar;
     window.showSection = showSection;
-    window.markAttendance = markAttendance;
     window.viewReports = viewReports;
     window.addEmployee = addEmployee;
     window.exportData = exportData;

@@ -10,7 +10,7 @@
         </div>
         <div class="top-actions">
             <a
-                href="{{ route('attendance.report.download', ['date' => $date]) }}"
+                href="{{ route('admin.attendance.report.download', ['date' => $date]) }}"
                 style="
                     padding: 0.5rem 1rem;
                     background-color: #4f46e5;
@@ -128,7 +128,7 @@
                                 padding: 0.25rem 0.5rem;
                                 border-radius: 0.25rem;
                             "
-                            >{{ $attendance->location ?? '-' }}</span
+                            >{{  $attendance->attendanceLocation->name ?? 'Tidak diketahui' }}</span
                         >
                     </td>
                 </tr>

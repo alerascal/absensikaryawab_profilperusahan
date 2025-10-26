@@ -7,6 +7,9 @@ use App\Models\Attendance;
 use App\Models\User;
 use Carbon\Carbon;
 use App\Models\Department;
+use PDF; // Assuming you're using a PDF generation package like barryvdh/laravel-dompdf
+
+
 
 class ReportController extends Controller
 {
@@ -111,5 +114,57 @@ class ReportController extends Controller
         ])->get();
 
         return view('reports.monthly', compact('monthlyAttendances', 'month', 'year'));
+    }
+
+    public function downloadAttendance(Request $request, $date)
+    {
+        $query = Attendance::with('user.department')->whereDate('date', $date);
+        $attendances = $query->orderBy('check_in', 'asc')->get();
+
+        // Load the view for the PDF
+        $pdf = PDF::loadView('reports.attendance_pdf', compact('attendances', 'date'));
+
+        // Download the PDF
+        return $pdf->download('attendance_report_' . $date . '.pdf');
+    }
+    public function monthlyPdf(Request $request)
+    {
+        $month = $request->month ?? Carbon::now()->month;
+        $year  = $request->year ?? Carbon::now()->year;
+
+        $monthlyAttendances = User::with('department')->withCount([
+            'attendances as present_count' => function ($q) use ($month, $year) {
+                $q->where('status', 'Hadir')
+                    ->whereMonth('date', $month)
+                    ->whereYear('date', $year);
+            },
+            'attendances as late_count' => function ($q) use ($month, $year) {
+                $q->where('status', 'Terlambat')
+                    ->whereMonth('date', $month)
+                    ->whereYear('date', $year);
+            },
+            'attendances as absent_count' => function ($q) use ($month, $year) {
+                $q->where('status', 'Alpha')
+                    ->whereMonth('date', $month)
+                    ->whereYear('date', $year);
+            },
+            'attendances as remote_count' => function ($q) use ($month, $year) {
+                $q->where('status', 'Remote')
+                    ->whereMonth('date', $month)
+                    ->whereYear('date', $year);
+            },
+        ])->get();
+
+        // ✅ ini fix error
+        $displayMonth = Carbon::createFromDate($year, $month, 1)->translatedFormat('F Y');
+
+        $pdf = \PDF::loadView('reports.monthly_pdf', [
+            'monthlyAttendances' => $monthlyAttendances,
+            'month' => $month,
+            'year' => $year,
+            'displayMonth' => $displayMonth,
+        ]);
+
+        return $pdf->download("rekap_kehadiran_{$month}_{$year}.pdf");
     }
 }
