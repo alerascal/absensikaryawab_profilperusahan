@@ -279,9 +279,30 @@ class AttendanceService
             // ===== LOGIKA JAM MASUK DAN STATUS =====
             $start = Carbon::parse($schedule->start_time);
             $end = Carbon::parse($schedule->end_time);
-            $lateMinutes = $start->diffInMinutes($now, false);
-            $status = $lateMinutes > 10 ? 'Terlambat' : 'Hadir';
 
+            // Hitung selisih waktu sekarang terhadap jam masuk
+            $diffMinutes = $now->diffInMinutes($start, false);
+
+            // Jika belum waktunya absen
+            if ($diffMinutes < 0) {
+                return [
+                    'success' => false,
+                    'message' => 'Belum waktunya absen. Silakan absen setelah jam ' . $start->format('H:i'),
+                    'status' => 422,
+                ];
+            }
+
+            // Jika sudah lewat 30 menit dari jam masuk → dianggap tidak hadir
+            if ($diffMinutes > 30) {
+                return [
+                    'success' => false,
+                    'message' => 'Anda sudah melewati batas waktu absen (lebih dari 30 menit). Status: Tidak Hadir.',
+                    'status' => 422,
+                ];
+            }
+
+            // Jika masih dalam 0–30 menit dari jam masuk → Hadir
+            $status = 'Hadir';
             // ===== SIMPAN ABSENSI =====
             $attendance = Attendance::create([
                 'user_id' => $user->id,
@@ -317,7 +338,6 @@ class AttendanceService
             return ['success' => false, 'message' => 'Kesalahan sistem: ' . $e->getMessage(), 'status' => 500];
         }
     }
-
     /**
      * Hitung jarak antar dua titik koordinat (dalam meter)
      */

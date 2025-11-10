@@ -22,12 +22,14 @@ class AdminController extends Controller
         $today = Carbon::today()->toDateString();
         $now = Carbon::now();
 
+        // Konversi hari agar sesuai (Carbon: 0 = Minggu, 1 = Senin, dst)
+        $dayOfWeek = $now->dayOfWeek === 0 ? 7 : $now->dayOfWeek;
+
         // Ambil jadwal user dengan shift
         $schedule = $user->schedules()
-            ->whereJsonContains('day', $now->dayOfWeek)
+            ->whereJsonContains('day', $dayOfWeek)
             ->with('shift')
             ->first();
-
         if ($schedule) {
             if ($schedule->shift) {
                 // Kalau ada shift
@@ -39,11 +41,9 @@ class AdminController extends Controller
                 $jamPulang = Carbon::parse($schedule->end_time)->format('H:i');
             }
         } else {
-            // Fallback: cari jadwal fulltime langsung di tabel schedules
-            $scheduleFull = \App\Models\Schedule::whereJsonContains('day', $now->dayOfWeek)
+            $scheduleFull = \App\Models\Schedule::whereJsonContains('day', $dayOfWeek)
                 ->where('is_fulltime', 1)
                 ->first();
-
             if ($scheduleFull) {
                 $jamMasuk = Carbon::parse($scheduleFull->start_time)->format('H:i');
                 $jamPulang = Carbon::parse($scheduleFull->end_time)->format('H:i');

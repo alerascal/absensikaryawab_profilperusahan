@@ -24,16 +24,14 @@ class Schedule extends Model
         'day' => 'array',
         'is_fulltime' => 'boolean',
     ];
-
-
     /**
      * Relasi many-to-many dengan User
      */
-    public function users(): BelongsToMany
+    public function users()
     {
-        return $this->belongsToMany(User::class, 'schedule_users');
+        return $this->belongsToMany(User::class, 'schedule_user', 'schedule_id', 'user_id')
+            ->withTimestamps();
     }
-
     /**
      * Relasi dengan Shift (hanya untuk non-fulltime)
      */
@@ -49,7 +47,6 @@ class Schedule extends Model
     {
         return $this->hasMany(Holiday::class);
     }
-
     /**
      * Helper: Get day name in Indonesian
      */
@@ -67,7 +64,6 @@ class Schedule extends Model
 
         return $days[$this->day] ?? 'Tidak diketahui';
     }
-
     /**
      * Scope: Filter by day
      */
@@ -75,8 +71,6 @@ class Schedule extends Model
     {
         return $query->whereJsonContains('day', $day);
     }
-
-
     /**
      * Scope: Only fulltime schedules
      */
@@ -84,7 +78,6 @@ class Schedule extends Model
     {
         return $query->where('is_fulltime', true);
     }
-
     /**
      * Scope: Only shift schedules
      */

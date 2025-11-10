@@ -14,6 +14,7 @@ use Carbon\Carbon;
 use App\Exports\MyAttendanceExport;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Services\AttendanceService;
+use Illuminate\Support\Facades\Log;
 
 class AttendanceController extends Controller
 {
@@ -164,63 +165,79 @@ class AttendanceController extends Controller
         $now = now();
         $dayOfWeek = $now->isoWeekday(); // 1 = Senin ... 7 = Minggu
 
+        Log::info("Cek jadwal untuk user {$user->name} pada hari ke-{$dayOfWeek}");
+
         // ===== CEK LIBUR NASIONAL =====
-        if ($this->attendanceService->isHoliday($today)) {
+        if (method_exists($this, 'attendanceService') && $this->attendanceService->isHoliday($today)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Hari ini adalah hari libur. Absensi tidak diperlukan.',
             ]);
         }
 
-        // ===== CEK JADWAL HARI INI (FULLTIME ATAU SHIFT) =====
+        // ===== CEK JADWAL HARI INI =====
         $schedule = $user->schedules()
             ->whereJsonContains('day', $dayOfWeek)
+            ->with('shift')
             ->first();
 
-        // ===== Jika tidak ada jadwal fulltime =====
+        // ===== Jika tidak ada jadwal untuk hari ini =====
         if (!$schedule) {
-            // Cari jadwal shift
+            Log::warning("Tidak ditemukan jadwal berdasarkan hari untuk {$user->name}. Coba cari jadwal shift...");
+
+            // Coba cari jadwal shift user
             $schedule = $user->schedules()
                 ->where('is_fulltime', false)
                 ->whereHas('shift')
+                ->with('shift')
                 ->first();
         }
 
         // ===== Jika tetap tidak ada =====
         if (!$schedule) {
-            // Default fallback ke fulltime jika memang tipe user-nya fulltime
-            if (strtolower($user->shift_type ?? '') === 'fulltime') {
+            Log::error("User {$user->name} tidak memiliki jadwal apapun.");
+
+            // Cek apakah user fulltime (bisa pakai kolom employment_status / shift_type)
+            if (strtolower($user->employment_status ?? '') === 'full-time') {
+                // fallback jadwal default
                 $schedule = (object) [
                     'id' => null,
                     'start_time' => '07:00:00',
                     'end_time' => '16:00:00',
                     'is_fulltime' => true,
+                    'shift' => null,
                 ];
             } else {
                 return response()->json([
                     'success' => false,
                     'message' => 'Tidak ada jadwal untuk hari ini. Hubungi admin.',
-                ]);
+                ], 422);
             }
         }
 
-        // ===== Ambil jam dari shift jika jadwal shift =====
-        $start = $schedule->start_time ?? ($schedule->shift->start_time ?? '07:00:00');
-        $end = $schedule->end_time ?? ($schedule->shift->end_time ?? '16:00:00');
+        // ===== Ambil jam kerja dari jadwal atau shift =====
+        $start = $schedule->start_time
+            ?? optional($schedule->shift)->start_time
+            ?? '07:00:00';
+
+        $end = $schedule->end_time
+            ?? optional($schedule->shift)->end_time
+            ?? '16:00:00';
 
         // ===== RETURN BERHASIL =====
         return response()->json([
             'success' => true,
+            'message' => 'Jadwal ditemukan',
             'schedule' => [
                 'id' => $schedule->id ?? null,
                 'start_time' => $start,
                 'end_time' => $end,
                 'is_fulltime' => $schedule->is_fulltime ?? false,
                 'type' => ($schedule->is_fulltime ?? false) ? 'Fulltime' : 'Shift',
+                'days' => $schedule->day ?? [],
             ],
         ]);
     }
-
     public function myAttendance(Request $request)
     {
         $query = Attendance::with(['attendanceLocation'])

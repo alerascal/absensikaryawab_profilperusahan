@@ -22,42 +22,33 @@ class User extends Authenticatable
         'employment_status',
         'join_date',
     ];
-
     protected $hidden = [
         'password',
         'remember_token',
     ];
-
     protected $casts = [
         'is_active' => 'boolean',
         'join_date' => 'date',
     ];
-
     // Relasi ke Department
     public function department()
     {
         return $this->belongsTo(Department::class);
     }
-
     public function schedules()
     {
-        return $this->hasMany(Schedule::class);
+        return $this->belongsToMany(Schedule::class, 'schedule_user', 'user_id', 'schedule_id');
     }
-
-
-
     // Relasi ke Attendances
     public function attendances()
     {
         return $this->hasMany(Attendance::class, 'user_id');
     }
-
     // Relasi ke Pengajuan (menggantikan atau melengkapi Leave)
     public function pengajuans()
     {
         return $this->hasMany(Pengajuan::class, 'user_id');
     }
-
     // Cek apakah user memiliki role tertentu
     public function hasRole($role)
     {

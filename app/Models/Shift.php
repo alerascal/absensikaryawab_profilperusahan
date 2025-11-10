@@ -24,7 +24,6 @@ class Shift extends Model
             5 => 'Jumat',
             6 => 'Sabtu',
         ];
-
         return $days[$this->day] ?? '-';
     }
 }
