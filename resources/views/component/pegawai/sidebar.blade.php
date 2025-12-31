@@ -70,7 +70,7 @@
         <!-- Pengajuan Izin / Sakit -->
         <li class="nav-item">
             <a
-                href="{{ route('pegawai.pengajuan.index') }}"
+                href="{{ route('pengajuan.my') }}"
                 class="nav-link flex items-center gap-2 p-2 rounded {{ request()->routeIs('pegawai.pengajuan.*') ? 'bg-blue-100 text-blue-600' : 'text-gray-700 hover:bg-gray-100' }}"
             >
                 <i class="fas fa-file-alt"></i>

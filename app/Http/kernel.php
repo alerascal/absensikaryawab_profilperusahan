@@ -66,5 +66,6 @@ class Kernel extends HttpKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->command('chat:archive-weekly')->weekly();
+        $schedule->command('pengajuan:cleanup-old')->dailyAt('03:00');
     }
 }

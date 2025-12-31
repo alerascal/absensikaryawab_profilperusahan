@@ -17,52 +17,104 @@ class ScheduleController extends Controller
      */
     public function index()
     {
-        $schedules = Schedule::with(['shift', 'users'])
-            ->orderBy('id')
-            ->get()
-            ->groupBy(fn($item) =>
-                $item->start_time . '-' . $item->end_time . '-' .
-                $item->is_fulltime . '-' . ($item->shift_id ?? '0')
-            );
-
-        $usersInShift = $schedules->flatMap(function ($group) {
-            $first = $group->first();
-            return $first->is_fulltime ? [] : $first->users->pluck('id');
-        })->unique();
-
-        $groupedSchedules = $schedules->map(function ($group) use ($usersInShift) {
-            $first = $group->first();
-
-            $users = $first->is_fulltime
-                ? $first->users->reject(fn($u) => $usersInShift->contains($u->id))->values()
-                : $first->users;
-
-            return (object) [
-                'ids'        => $group->pluck('id')->toArray(),
-                'start_time' => $first->start_time,
-                'end_time'   => $first->end_time,
-                'is_fulltime' => $first->is_fulltime,
-                'shift'      => $first->shift,
-                'users'      => $users,
-            ];
-        });
-
-        // Ambil hari libur global
-        $holidays = Holiday::pluck('day_of_week')->toArray();
-
         $dayNames = [
-            1 => "Senin",
-            2 => "Selasa",
-            3 => "Rabu",
-            4 => "Kamis",
-            5 => "Jumat",
-            6 => "Sabtu",
-            7 => "Minggu",
+            1 => 'Senin',
+            2 => 'Selasa',
+            3 => 'Rabu',
+            4 => 'Kamis',
+            5 => 'Jumat',
+            6 => 'Sabtu',
+            7 => 'Minggu',
         ];
 
-        $holidayNames = array_map(fn($d) => $dayNames[$d] ?? 'Tidak diketahui', $holidays);
+        // Hari libur
+        $holidays = Holiday::pluck('day_of_week')->toArray();
 
-        return view('admin.schedules.index', compact('groupedSchedules', 'holidayNames'));
+        // Ambil semua schedule (TERBARU DIUTAMAKAN)
+        $schedules = Schedule::with(['shift', 'users'])
+            ->orderBy('id', 'desc')
+            ->get();
+
+        /**
+         * STEP 1
+         * Jadwal TERAKHIR per user per hari
+         */
+        $latestSchedulePerUserPerDay = [];
+
+        foreach ($schedules as $schedule) {
+            foreach ($schedule->users as $user) {
+                $key = $user->id . '-' . $schedule->day;
+
+                if (!isset($latestSchedulePerUserPerDay[$key])) {
+                    $latestSchedulePerUserPerDay[$key] = $schedule;
+                }
+            }
+        }
+
+        /**
+         * STEP 2
+         * Susun jadwal mingguan
+         */
+        $weeklySchedules = collect(range(1, 7))->mapWithKeys(function ($day) use (
+            $schedules,
+            $latestSchedulePerUserPerDay,
+            $dayNames,
+            $holidays
+        ) {
+            // Hari libur
+            if (in_array($day, $holidays)) {
+                return [$day => (object)[
+                    'day_name' => $dayNames[$day],
+                    'is_holiday' => true,
+                    'schedules' => collect(),
+                ]];
+            }
+
+            $daySchedules = $schedules->where('day', $day);
+
+            $grouped = $daySchedules
+                ->groupBy(
+                    fn($s) =>
+                    $s->start_time . '-' .
+                        $s->end_time . '-' .
+                        $s->is_fulltime . '-' .
+                        ($s->shift_id ?? '0')
+                )
+                ->map(function ($group) use ($latestSchedulePerUserPerDay, $day) {
+                    $first = $group->first();
+
+                    $users = $group->flatMap->users
+                        ->unique('id')
+                        ->filter(function ($user) use ($latestSchedulePerUserPerDay, $first, $day) {
+                            $key = $user->id . '-' . $day;
+                            return isset($latestSchedulePerUserPerDay[$key]) &&
+                                $latestSchedulePerUserPerDay[$key]->id === $first->id;
+                        })
+                        ->values();
+
+                    return (object)[
+                        'ids'         => $group->pluck('id')->toArray(),
+                        'start_time'  => $first->start_time,
+                        'end_time'    => $first->end_time,
+                        'is_fulltime' => $first->is_fulltime,
+                        'shift'       => $first->shift,
+                        'users'       => $users,
+                    ];
+                })
+                ->values();
+
+            return [$day => (object)[
+                'day_name' => $dayNames[$day],
+                'is_holiday' => false,
+                'schedules' => $grouped,
+            ]];
+        });
+
+        return view('admin.schedules.index', compact(
+            'weeklySchedules',
+            'dayNames',
+            'holidays'
+        ));
     }
 
     /**
@@ -82,12 +134,10 @@ class ScheduleController extends Controller
     public function store(Request $request)
     {
         // Normalisasi waktu
-        if ($request->start_time) {
-            $request->merge(['start_time' => Carbon::parse($request->start_time)->format('H:i')]);
-        }
-        if ($request->end_time) {
-            $request->merge(['end_time' => Carbon::parse($request->end_time)->format('H:i')]);
-        }
+        $request->merge([
+            'start_time' => Carbon::parse($request->start_time)->format('H:i'),
+            'end_time'   => Carbon::parse($request->end_time)->format('H:i'),
+        ]);
 
         $validated = $request->validate([
             'start_time'  => 'required|date_format:H:i',
@@ -98,74 +148,54 @@ class ScheduleController extends Controller
             'user_ids'    => 'nullable|array',
         ]);
 
-        // Simpan hari libur mingguan ke tabel
+        // Simpan hari libur
         Holiday::whereNotNull('day_of_week')->delete();
-        $holidays = $validated['holidays'] ?? [];
-        foreach ($holidays as $day) {
+        foreach ($validated['holidays'] ?? [] as $day) {
             Holiday::create([
                 'name' => 'Libur Mingguan',
                 'day_of_week' => $day,
             ]);
         }
 
-        // Cek shift malam
-        $start = Carbon::createFromFormat('H:i', $validated['start_time']);
-        $end   = Carbon::createFromFormat('H:i', $validated['end_time']);
-        if ($end->lessThanOrEqualTo($start)) $end->addDay();
-        if ($start->equalTo($end)) {
-            return back()->withErrors(['end_time' => 'Waktu selesai tidak boleh sama dengan waktu mulai.'])->withInput();
-        }
+        // ===============================
+        // CREATE SHIFT / FULLTIME
+        // ===============================
+        foreach (range(1, 5) as $day) {
+            if (in_array($day, $validated['holidays'] ?? [])) continue;
 
-        // Ambil user eligible
-        $usersInShift = Schedule::where('is_fulltime', false)->with('users')->get()
-            ->flatMap(fn($s) => $s->users->pluck('id'))->unique();
-        $eligibleUsers = User::whereNotIn('id', $usersInShift)->pluck('id')->toArray();
+            $schedule = Schedule::create([
+                'day'         => $day,
+                'start_time'  => $validated['start_time'],
+                'end_time'    => $validated['end_time'],
+                'is_fulltime' => $validated['is_fulltime'],
+                'shift_id'    => $validated['is_fulltime'] ? null : $validated['shift_id'],
+            ]);
 
-        if ($validated['is_fulltime']) {
-            // Full-time Senin–Jumat (skip libur)
-            foreach (range(1, 5) as $day) {
-                if (in_array($day, $holidays)) continue;
-
-                $schedule = Schedule::create([
-                    'day'         => $day,
-                    'start_time'  => $validated['start_time'],
-                    'end_time'    => $validated['end_time'],
-                    'is_fulltime' => true,
-                    'shift_id'    => null,
-                ]);
-                $schedule->users()->sync($eligibleUsers);
-            }
-        } else {
-            // Shift Senin–Jumat (skip libur)
-            foreach (range(1, 5) as $day) {
-                if (in_array($day, $holidays)) continue;
-
-                // Filter user agar tidak dobel shift di hari yang sama
-                $alreadyAssigned = Schedule::where('day', $day)
-                    ->with('users')->get()
-                    ->flatMap(fn($s) => $s->users->pluck('id'))->unique();
-
-                $validUserIds = collect($validated['user_ids'] ?? [])->diff($alreadyAssigned)->toArray();
-
-                $schedule = Schedule::create([
-                    'day'         => $day,
-                    'start_time'  => $validated['start_time'],
-                    'end_time'    => $validated['end_time'],
-                    'is_fulltime' => false,
-                    'shift_id'    => $validated['shift_id'],
-                ]);
-                $schedule->users()->sync($validUserIds);
-            }
-
-            // Update fulltime → hanya user tanpa shift
-            $fulltimeSchedules = Schedule::where('is_fulltime', true)->get();
-            foreach ($fulltimeSchedules as $fulltimeSchedule) {
-                $fulltimeSchedule->users()->sync($eligibleUsers);
+            if (!$validated['is_fulltime']) {
+                $schedule->users()->sync($validated['user_ids'] ?? []);
             }
         }
 
-        return redirect()->route('admin.schedules.index')->with('success', 'Jadwal berhasil ditambahkan');
+        // ===============================
+        // UPDATE FULLTIME (SETELAH SHIFT)
+        // ===============================
+        $usersInShift = Schedule::where('is_fulltime', false)
+            ->with('users')
+            ->get()
+            ->flatMap(fn($s) => $s->users->pluck('id'))
+            ->unique();
+
+        $eligibleUsers = User::whereNotIn('id', $usersInShift)->pluck('id');
+
+        Schedule::where('is_fulltime', true)
+            ->get()
+            ->each(fn($s) => $s->users()->sync($eligibleUsers));
+
+        return redirect()
+            ->route('admin.schedules.index')
+            ->with('success', 'Jadwal berhasil ditambahkan');
     }
+
 
     /**
      * Form edit jadwal
@@ -196,8 +226,17 @@ class ScheduleController extends Controller
      */
     public function update(Request $request, Schedule $schedule)
     {
-        if ($request->start_time) $request->merge(['start_time' => Carbon::parse($request->start_time)->format('H:i')]);
-        if ($request->end_time) $request->merge(['end_time' => Carbon::parse($request->end_time)->format('H:i')]);
+        if ($request->start_time) {
+            $request->merge([
+                'start_time' => Carbon::parse($request->start_time)->format('H:i')
+            ]);
+        }
+
+        if ($request->end_time) {
+            $request->merge([
+                'end_time' => Carbon::parse($request->end_time)->format('H:i')
+            ]);
+        }
 
         $validated = $request->validate([
             'start_time'  => 'required|date_format:H:i',
@@ -211,8 +250,7 @@ class ScheduleController extends Controller
 
         // Update libur
         Holiday::whereNotNull('day_of_week')->delete();
-        $holidays = $validated['holidays'] ?? [];
-        foreach ($holidays as $day) {
+        foreach ($validated['holidays'] ?? [] as $day) {
             Holiday::create([
                 'name' => 'Libur Mingguan',
                 'day_of_week' => $day,
@@ -230,42 +268,142 @@ class ScheduleController extends Controller
                 'shift_id'    => $validated['is_fulltime'] ? null : $validated['shift_id'],
             ]);
 
-            if ($validated['is_fulltime']) {
-                $usersInShift = Schedule::where('is_fulltime', false)->with('users')->get()
-                    ->flatMap(fn($sch) => $sch->users->pluck('id'))->unique();
-                $eligibleUsers = User::whereNotIn('id', $usersInShift)->pluck('id')->toArray();
-                $s->users()->sync($eligibleUsers);
-            } else {
-                $alreadyAssigned = Schedule::where('day', $s->day)
-                    ->where('id', '!=', $s->id)
-                    ->with('users')->get()
-                    ->flatMap(fn($sch) => $sch->users->pluck('id'))->unique();
-                $validUserIds = collect($validated['user_ids'] ?? [])->diff($alreadyAssigned)->toArray();
-                $s->users()->sync($validUserIds);
-            }
+            // 🔥 SIMPAN SESUAI PILIHAN ADMIN
+            $s->users()->sync($validated['user_ids'] ?? []);
         }
 
-        return redirect()->route('admin.schedules.index')->with('success', 'Jadwal berhasil diperbarui');
+        return redirect()
+            ->route('admin.schedules.index')
+            ->with('success', 'Jadwal berhasil diperbarui');
     }
+    /**
+     * Tampilkan jadwal kerja seorang pegawai
+     */
+    /**
+     * Tampilkan jadwal kerja seorang pegawai (sesuai yang dibuat admin)
+     */
+    public function show(User $user)
+    {
+        // Ambil semua schedule dan group seperti di admin
+        $schedules = Schedule::with(['shift', 'users'])
+            ->orderBy('id')
+            ->get()
+            ->groupBy(
+                fn($item) =>
+                $item->start_time . '-' . $item->end_time . '-' .
+                    $item->is_fulltime . '-' . ($item->shift_id ?? '0')
+            );
 
+        // Daftar user yang sedang masuk shift (bukan fulltime)
+        $usersInShift = $schedules->flatMap(function ($group) {
+            $first = $group->first();
+            return $first->is_fulltime ? [] : $first->users->pluck('id');
+        })->unique();
+
+        // Hari libur mingguan
+        $holidays = Holiday::pluck('day_of_week')->toArray();
+
+        // Nama hari
+        $dayNames = [
+            1 => 'Senin',
+            2 => 'Selasa',
+            3 => 'Rabu',
+            4 => 'Kamis',
+            5 => 'Jumat',
+            6 => 'Sabtu',
+            7 => 'Minggu',
+        ];
+
+        // Buat jadwal mingguan untuk user ini
+        $weeklySchedules = collect(range(1, 7))->mapWithKeys(function ($day) use (
+            $schedules,
+            $user,
+            $usersInShift,
+            $holidays,
+            $dayNames
+        ) {
+            // Hari libur
+            if (in_array($day, $holidays)) {
+                return [$day => (object)[
+                    'day_name'   => $dayNames[$day],
+                    'is_holiday' => true,
+                    'schedule'   => null,
+                    'type'       => 'holiday',
+                ]];
+            }
+
+            // Cari grup jadwal yang memiliki record untuk hari ini
+            $matchingGroup = $schedules->first(function ($group) use ($day) {
+                return $group->contains(fn($s) => $s->day == $day);
+            });
+
+            if (!$matchingGroup) {
+                return [$day => (object)[
+                    'day_name'   => $dayNames[$day],
+                    'is_holiday' => false,
+                    'schedule'   => null,
+                    'type'       => 'none',
+                ]];
+            }
+
+            $first = $matchingGroup->first();
+
+            // Cek apakah user ini masuk ke grup ini
+            $userInThisGroup = $first->is_fulltime
+                ? !$usersInShift->contains($user->id)  // fulltime = semua yang tidak di shift
+                : $first->users->contains('id', $user->id); // shift = yang dipilih admin
+
+            if ($userInThisGroup) {
+                return [$day => (object)[
+                    'day_name'   => $dayNames[$day],
+                    'is_holiday' => false,
+                    'schedule'   => (object)[
+                        'start_time'  => $first->start_time,
+                        'end_time'    => $first->end_time,
+                        'is_fulltime' => $first->is_fulltime,
+                        'shift'       => $first->shift,
+                    ],
+                    'type' => $first->is_fulltime ? 'fulltime' : 'shift',
+                ]];
+            }
+
+            // User tidak masuk jadwal ini
+            return [$day => (object)[
+                'day_name'   => $dayNames[$day],
+                'is_holiday' => false,
+                'schedule'   => null,
+                'type'       => 'none',
+            ]];
+        });
+
+        return view('pegawai.schedules.show', compact(
+            'user',
+            'weeklySchedules',
+            'dayNames',
+            'holidays'
+        ));
+    }
     /**
      * Hapus jadwal
      */
     public function destroy(Request $request, Schedule $schedule)
     {
+
         $ids = $request->input('ids', [$schedule->id]);
+
+        // Proteksi kalau masih string
+        $ids = collect($ids)
+            ->flatMap(fn($v) => is_string($v) ? explode(',', $v) : [$v])
+            ->map(fn($v) => (int) $v)
+            ->filter()
+            ->unique()
+            ->values()
+            ->toArray();
+
         Schedule::whereIn('id', $ids)->delete();
 
-        // Perbarui fulltime setelah hapus shift
-        $usersInShift = Schedule::where('is_fulltime', false)->with('users')->get()
-            ->flatMap(fn($s) => $s->users->pluck('id'))->unique();
-        $eligibleUsers = User::whereNotIn('id', $usersInShift)->pluck('id')->toArray();
-
-        $fulltimeSchedules = Schedule::where('is_fulltime', true)->get();
-        foreach ($fulltimeSchedules as $fulltimeSchedule) {
-            $fulltimeSchedule->users()->sync($eligibleUsers);
-        }
-
-        return redirect()->route('admin.schedules.index')->with('success', 'Jadwal berhasil dihapus');
+        return redirect()
+            ->route('admin.schedules.index')
+            ->with('success', 'Jadwal berhasil dihapus');
     }
 }

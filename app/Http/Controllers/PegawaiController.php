@@ -9,49 +9,61 @@ use Carbon\Carbon;
 
 class PegawaiController extends Controller
 {
-    // Dashboard khusus Pegawai
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
+    /**
+     * Dashboard khusus Pegawai
+     */
     public function pegawaiDashboard()
     {
         $user = Auth::user();
 
-        // Data absensi hari ini
+        // Absensi hari ini
         $todayAttendance = Attendance::where('user_id', $user->id)
             ->whereDate('date', Carbon::today())
             ->first();
 
-        $todayCheckIn  = $todayAttendance->check_in  ?? null;
-        $todayCheckOut = $todayAttendance->check_out ?? null;
-        $todayStatus   = $todayAttendance->status ?? 'Belum Absen';
+        $todayCheckIn  = $todayAttendance?->check_in ?? '-';
+        $todayCheckOut = $todayAttendance?->check_out ?? '-';
+        $todayStatus   = $todayAttendance?->status ?? 'Belum Absen';
 
-        // Total absensi bulan ini
+        // Total kehadiran bulan ini
         $totalAbsensi = Attendance::where('user_id', $user->id)
             ->whereMonth('date', Carbon::now()->month)
+            ->whereYear('date', Carbon::now()->year)
             ->count();
 
         // Riwayat absensi minggu ini
         $weeklyAttendance = Attendance::where('user_id', $user->id)
-            ->whereBetween('date', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])
+            ->whereBetween('date', [
+                Carbon::now()->startOfWeek(Carbon::MONDAY),
+                Carbon::now()->endOfWeek(Carbon::SUNDAY)
+            ])
             ->orderBy('date', 'asc')
             ->get();
 
-        // Grafik absensi bulan ini
-        $daysInMonth = Carbon::now()->daysInMonth;
+        // Data grafik kehadiran bulan ini
         $monthlyLabels = [];
         $monthlyHadir = [];
 
+        $daysInMonth = Carbon::now()->daysInMonth;
+
         for ($day = 1; $day <= $daysInMonth; $day++) {
-            $date = Carbon::createFromDate(Carbon::now()->year, Carbon::now()->month, $day);
-            $monthlyLabels[] = $date->translatedFormat('d M');
+            $date = Carbon::now()->day($day);
+            $monthlyLabels[] = $date->format('d');
 
             $hadir = Attendance::where('user_id', $user->id)
                 ->whereDate('date', $date)
                 ->where('status', 'Hadir')
-                ->count();
+                ->exists();
 
-            $monthlyHadir[] = $hadir;
+            $monthlyHadir[] = $hadir ? 1 : 0;
         }
 
-        return view('pages.pegawai.dashboard-pegawai', compact(
+        return view('dashboard-pegawai', compact(
             'todayCheckIn',
             'todayCheckOut',
             'todayStatus',
