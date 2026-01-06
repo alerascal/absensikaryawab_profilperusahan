@@ -10,17 +10,21 @@ class Pengajuan extends Model
     use HasFactory;
 
     protected $fillable = [
-        'title',
-        'description',
-        'status',
         'user_id',
+        'type',        // izin | sakit
+        'description',
+        'status',      // pending | accepted | rejected
         'surat_dokter',
         'surat_izin',
+        'date',
     ];
 
-    // Relasi ke User
+    protected $casts = [
+        'date' => 'date',
+    ];
+
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class);
     }
 }

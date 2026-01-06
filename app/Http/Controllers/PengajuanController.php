@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Attendance;
+use Carbon\Carbon;
+
 
 class PengajuanController extends Controller
 {
@@ -203,11 +206,40 @@ class PengajuanController extends Controller
             return back()->with('error', 'Anda tidak dapat menyetujui pengajuan milik sendiri.');
         }
 
+        // Update status pengajuan
         $pengajuan->update(['status' => 'approved']);
 
-        return redirect()->route('admin.pengajuan.index')->with('success', 'Pengajuan berhasil disetujui.');
-    }
+        // Tentukan status absensi
+        $attendanceStatus = null;
 
+        if (strtolower($pengajuan->title) === 'izin') {
+            $attendanceStatus = 'Izin';
+        }
+
+        if (strtolower($pengajuan->title) === 'sakit') {
+            $attendanceStatus = 'Sakit';
+        }
+
+        // Update / buat absensi hari ini
+        if ($attendanceStatus) {
+            Attendance::updateOrCreate(
+                [
+                    'user_id' => $pengajuan->user_id,
+                    'date' => Carbon::today(),
+                ],
+                [
+                    'status' => $attendanceStatus,
+                    'notes' => 'Otomatis dari pengajuan yang disetujui admin',
+                    'check_in' => null,
+                    'check_out' => null,
+                ]
+            );
+        }
+
+        return redirect()
+            ->route('admin.pengajuan.index')
+            ->with('success', 'Pengajuan disetujui & absensi otomatis diperbarui.');
+    }
     /**
      * Reject pengajuan (hanya admin & bukan milik sendiri)
      */

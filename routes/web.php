@@ -12,6 +12,7 @@ use App\Http\Controllers\PegawaiController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Admin\DepartmentController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\LocationController;
 use App\Http\Controllers\Admin\ShiftController;
 
 /*
@@ -139,18 +140,11 @@ Route::middleware(['auth', 'role:admin'])
             Route::get('/monthly/pdf', [AttendanceController::class, 'monthlyPdf'])->name('reports.monthly.pdf');
         });
 
-        // Lokasi Absensi
-        Route::prefix('locations')->name('locations.')->group(function () {
-            Route::get('/', [AttendanceController::class, 'locations'])->name('index');
-            Route::get('/create', [AttendanceController::class, 'createLocation'])->name('create');
-            Route::post('/', [AttendanceController::class, 'storeLocation'])->name('store');
-            Route::get('/{location}/edit', [AttendanceController::class, 'editLocation'])->name('edit');
-            Route::put('/{location}', [AttendanceController::class, 'updateLocation'])->name('update');
-            Route::delete('/{location}', [AttendanceController::class, 'destroyLocation'])->name('destroy');
-        });
+    Route::resource('locations', LocationController::class);
 
-        // Resource Routes
-        Route::resource('departments', DepartmentController::class);
+
+    // Resource Routes
+    Route::resource('departments', DepartmentController::class);
         Route::get('/departments/top', [DepartmentController::class, 'topDepartments'])->name('departments.top');
 
         Route::resource('employees', EmployeeController::class);

@@ -69,7 +69,8 @@
                         href="{{ route('admin.attendance.index') }}"
                         class="nav-link {{ request()->routeIs('admin.attendance.*') ? 'active' : '' }}"
                     >
-                        <i class="fas fa-calendar-check"></i> Data Absensi Pegawai
+                        <i class="fas fa-calendar-check"></i> Data Absensi
+                        Pegawai
                     </a>
                 </li>
                 <li class="nav-item">
