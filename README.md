@@ -1,63 +1,77 @@
 # 🏢 Sistem Absensi Karyawan & Profil Perusahaan
 
-Proyek ini adalah aplikasi berbasis **Laravel 10** untuk mengelola absensi karyawan sekaligus menampilkan profil perusahaan.  
-Aplikasi ini dirancang untuk memudahkan pencatatan kehadiran dengan **kamera + GPS**, serta memberikan informasi lengkap mengenai profil perusahaan.
+Aplikasi **Sistem Absensi Karyawan & Profil Perusahaan** adalah aplikasi berbasis **Laravel 10** yang dirancang untuk membantu perusahaan dalam mengelola kehadiran karyawan secara **modern, akurat, dan terintegrasi**.
+
+Aplikasi ini menggabungkan fitur **absensi berbasis kamera dan validasi GPS** dengan **manajemen data karyawan** serta **tampilan profil perusahaan** dalam satu sistem.
+
+---
+
+## 🎯 Tujuan Proyek
+
+- Meningkatkan akurasi pencatatan kehadiran karyawan
+- Mencegah kecurangan absensi (titip absen)
+- Memudahkan admin dalam monitoring kehadiran
+- Menyediakan informasi profil perusahaan secara terpusat
+- Menjadi solusi absensi berbasis web yang scalable
+
+---
 
 ## ✨ Fitur Utama
-- 📸 **Absensi Kamera** → Ambil foto sebagai bukti kehadiran.
-- 📍 **Validasi GPS** → Absensi hanya bisa dilakukan di lokasi yang ditentukan.
-- 👨‍💼 **Manajemen Karyawan** → Tambah, edit, hapus data karyawan.
-- 🏢 **Profil Perusahaan** → Menampilkan informasi detail perusahaan.
-- 📊 **Dashboard Admin** → Monitoring absensi karyawan & ringkasan data.
-- 📂 **Laporan Absensi** → Rekap data absensi harian & bulanan.
-- 🔐 **Autentikasi User** → Login & role management (admin/karyawan).
-## 🚀 Instalasi
 
-Ikuti langkah berikut untuk menjalankan proyek secara lokal:
+### 🔐 Autentikasi & Hak Akses
+- Login sistem
+- Role management (**Admin & Karyawan**)
 
-### 1. Clone Repository
+### 📸 Absensi Karyawan
+- Absensi menggunakan **kamera (foto real-time)**
+- Validasi **lokasi GPS**
+- Pembatasan radius absensi
+- Timestamp otomatis
+
+### 👨‍💼 Manajemen Karyawan
+- Tambah data karyawan
+- Edit & hapus data karyawan
+- Pengelompokan karyawan
+
+### 📊 Dashboard Admin
+- Ringkasan absensi harian
+- Monitoring kehadiran karyawan
+- Statistik kehadiran
+
+### 📂 Laporan Absensi
+- Rekap absensi harian
+- Rekap absensi bulanan
+- Riwayat absensi karyawan
+
+### 🏢 Profil Perusahaan
+- Informasi perusahaan
+- Deskripsi visi & misi
+- Data pendukung perusahaan
+
+---
+
+## 🖥️ Tampilan Aplikasi
+
+> 📌 *Screenshot dapat ditambahkan pada folder `/public/screenshots` untuk dokumentasi visual.*
+
+---
+
+## ⚙️ Teknologi yang Digunakan
+
+| Teknologi | Keterangan |
+|---------|-----------|
+| Laravel 10 | Backend Framework |
+| PHP | Bahasa Pemrograman |
+| MySQL | Database |
+| Blade | Template Engine |
+| JavaScript | Frontend Logic |
+| Bootstrap / Tailwind CSS | UI Styling |
+| Vite | Asset Bundler |
+| HTML5 & CSS3 | Struktur & Styling |
+
+---
+
+## 🚀 Instalasi & Menjalankan Proyek
+
+### 1️⃣ Clone Repository
 git clone https://github.com/alerascal/absensikaryawab_profilperusahan.git
-2. Masuk ke Folder Proyek
-cd absensikaryawab_profilperusahan
-3. Install Dependency Laravel
-composer install
-4. Install Dependency Frontend
-npm install && npm run build
-5. Copy File Environment
-cp .env.example .env
-6. Generate Application Key
-php artisan key:generate
-7. Konfigurasi Database
-Edit file .env dan sesuaikan dengan database lokal kamu
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=absensi_db
-DB_USERNAME=root
-DB_PASSWORD=
-8. Migrasi Database
-php artisan migrate
-9. Jalankan Server
-php artisan serve
-Aplikasi akan berjalan di:
-👉 http://127.0.0.1:8000
-⚙️ Teknologi yang Digunakan
-Laravel 10\
-MySQL
-Bootstrap / Tailwind (opsional untuk UI)\
-JavaScript
-📌 Roadmap
- Absensi berbasis kamera
-
- Validasi GPS absensi
-
- Export laporan ke Excel/PDF
-
- Notifikasi email untuk absensi
-
- Integrasi API untuk HR system
-
-👤 Author
-Moh Sahrul Alam Syah (alerascal)
-📧 Email: alerascal77@gmail.com
-🔗 GitHub: alerascal
